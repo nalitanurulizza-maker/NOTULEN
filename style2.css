@@ -1,0 +1,248 @@
+/* Reset dasar */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", sans-serif;
+}
+
+/* Struktur umum */
+body {
+  background-color: #f5f7fa;
+  color: #333;
+}
+
+.container {
+  display: flex;
+  height: 100vh;
+}
+
+/* ================================
+   SIDEBAR
+================================ */
+.sidebar {
+  width: 250px;
+  height: 100vh;
+  background-color: #0d6efd;
+  color: white;
+  position: fixed;
+  left: 0;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 25px 20px;
+}
+
+.sidebar h2 {
+  font-size: 22px;
+  font-weight: bold;
+  margin-bottom: 40px;
+}
+
+.sidebar a {
+  text-decoration: none;
+  color: white;
+  padding: 12px 15px;
+  display: block;
+  font-size: 16px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  transition: 0.2s;
+}
+
+.sidebar a:hover {
+  background-color: rgba(255,255,255,0.2);
+}
+
+.sidebar .active {
+  background-color: rgba(255,255,255,0.25) !important;
+}
+
+.logout-btn {
+  margin-top: auto;
+  background-color: #dc3545 !important;
+  text-align: center;
+  font-weight: bold;
+  border-radius: 8px;
+}
+
+
+/* Konten utama */
+.main-content {
+  flex: 1;
+  padding: 30px;
+  background: #f8f9fa;
+  overflow-y: auto;
+}
+
+/* Header atas */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.header h1 {
+  color: #243b55;
+  font-size: 1.6rem;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-primary {
+  background-color: #2a9d8f;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.btn-primary:hover {
+  background-color: #21867a;
+}
+
+.btn-secondary {
+  background-color: #e0e0e0;
+  color: #333;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.btn-secondary:hover {
+  background-color: #cfd8dc;
+}
+
+/* Kolom pencarian */
+.search-bar {
+  margin-bottom: 20px;
+}
+
+.search-bar input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  outline: none;
+  transition: border 0.3s;
+}
+
+.search-bar input:focus {
+  border-color: #2a9d8f;
+}
+
+/* Tabel */
+.notulen-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.notulen-table th {
+  background: #1476e7;
+  color: white;
+  text-align: left;
+  padding: 12px;
+  font-weight: 500;
+}
+
+.notulen-table td {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.notulen-table tr:hover {
+  background-color: #f1f5f9;
+}
+
+/* Input dalam tabel */
+.notulen-table input[type="text"],
+.notulen-table input[type="date"] {
+  width: 95%;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  outline: none;
+  transition: border 0.3s;
+}
+
+.notulen-table input:focus {
+  border-color: #2a9d8f;
+}
+
+/* Status */
+.status {
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.status.aktif {
+  background: #e6f7f1;
+  color: #2a9d8f;
+}
+
+.status.diarsipkan {
+  background: #fdecea;
+  color: #d62828;
+}
+
+/* Tombol aksi */
+.btn {
+  background: #e0e0e0;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.btn:hover {
+  background: #b0bec5;
+  color: white;
+}
+
+/* Scroll lembut */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Responsif */
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-around;
+    padding: 15px;
+  }
+
+  .main-content {
+    padding: 20px;
+  }
+
+  .notulen-table th, .notulen-table td {
+    font-size: 0.9rem;
+  }
+}
+
+/* Jarak main-content dari sidebar biar tidak ketutupan */
+.main-content {
+    margin-left: 260px;   /* sesuaikan dengan lebar sidebar */
+    padding: 20px;
+}
