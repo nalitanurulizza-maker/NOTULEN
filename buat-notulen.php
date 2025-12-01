@@ -123,29 +123,99 @@
         </div>
 
         <!-- Tabel Peserta -->
-        <h5 class="mt-4 mb-2">Daftar Peserta</h5>
-        <div class="table-responsive">
-          <table class="table table-bordered align-middle" id="tabelPenanggungJawab">
-            <thead class="table-light">
-              <tr>
-                <th>Nama</th>
-                <th>Tugas</th>
-                <th>Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><input type="text" class="form-control" placeholder="Nama"></td>
-                <td><input type="text" class="form-control" placeholder="Tugas"></td>
-                <td class="aksi">
-                    <button class="btn btn-sm btn-warning me-1">Edit</button>
-               <a href="data di hapus.html" class="btn btn-sm btn-danger me-1">Hapus</a>               
-              </tr>
-            </tbody>  
-          </table>
-        <div class="d-flex justify-content-end mt-4">
-            <button type="button" class="btn btn-success px-3" id="tambahBtn">+ Tambah</button>
-        </div>
+        <h3><i class="fas fa-user-graduate me-2"></i> Daftar Peserta</h3><hr> 
+<button type="button" class="btn btn-primary mb-2" 
+        data-bs-toggle="modal" 
+        data-bs-target="#tambahDataModal">
+    <i class="fas fa-plus-circle me-2"></i>TAMBAH DATA PESERTA
+</button>
+
+<div class="modal fade" id="tambahDataModal" tabindex="-1" aria-labelledby="tambahDataLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="tambahDataLabel">Tambah Data Peserta</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="tambahpeserta-buat.php" method="POST">
+                    <div class="mb-3">
+                        <label for="nim" class="form-label">NAMA</label>
+                        <input type="text" class="form-control" id="nim" name="nim" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="nama" class="form-label">EMAIL</label>
+                        <input type="text" class="form-control" id="nama" name="nama" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Edit Data --> 
+    <div class="modal fade" id="editDataModal" tabindex="-1" aria-labelledby="editDataLabel" aria-hidden="true"> 
+      <div class="modal-dialog"> 
+        <div class="modal-content"> 
+          <div class="modal-header"> 
+            <h5 class="modal-title" id="editDataLabel">Edit Data Peserta</h5> 
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> 
+          </div> 
+          <div class="modal-body"> 
+            <form action="ubahpeserta-buat.php" method="POST"> 
+              <div class="mb-3"> 
+                <label for="edit-nama" class="form-label">Nama</label> 
+                <input type="text" class="form-control" id="edit-nama" name="namapeserta" required> 
+              </div> 
+              <div class="mb-3"> 
+                <label for="edit-email" class="form-label">email</label> 
+                <input type="text" class="form-control" id="edit-email" name="emailpeserta" required> 
+              </div> 
+              <button type="submit" class="btn btn-primary">Update</button> 
+            </form> 
+          </div> 
+        </div> 
+      </div> 
+    </div> 
+
+<table class="table table-striped table-bordered"> 
+<thead> 
+<tr> 
+<th scope="col">NO</th> 
+<th scope="col">NAMA</th> 
+<th scope="col">EMAIL</th> 
+<th scope="col">AKSI</th> 
+</tr> 
+</thead> 
+<tbody> 
+<?php 
+include 'koneksi.php'; 
+$query = mysqli_query($koneksi, "SELECT * FROM `tambah notulen`"); 
+$no = 1; 
+while ($data = mysqli_fetch_assoc($query)) { 
+?> 
+<tr> 
+<td><?php echo $no++; ?></td> 
+<td><?php echo $data['namapeserta']; ?></td> 
+<td><?php echo $data['emailpeserta']; ?></td> 
+<td>
+    <button class= "btn btn-success btn-sm me-l edit-button"
+            data-bs-toggle="modal"
+            data-bs-target="#editDataModal"
+            data-nim="<?php echo $data['namapeserta']; ?>"
+            data-nama="<?php echo $data['emailpeserta']; ?>">
+    <i class="fas fa-edit"></i> Edit
+    </button>
+    <a href="hapus_peserta.php?nim=<?php echo $data['namapeserta']; ?>"class="btn btn-danger btn-sm">
+        <i class="fas fa-trash-alt"></i> Delete</a>
+</td>
+</tr>
+<?php 
+} 
+?> 
+</tbody>
+</table>
 
         <!-- Lampiran -->
         <h4>Lampiran</h4>
