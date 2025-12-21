@@ -1,3 +1,26 @@
+<?php
+session_start();
+include 'koneksi.php';
+
+// Cek login
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit;
+}
+
+// Ambil data user
+$id = $_SESSION['user_id'];
+$query = mysqli_query($koneksi, "SELECT * FROM user WHERE id='$id'");
+$user = mysqli_fetch_assoc($query);
+
+// Validasi data
+if (!$user) {
+    die("Data user tidak ditemukan!");
+}
+
+// Inisial username
+$inisial = strtoupper(substr($user['username'], 0, 1));
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -7,127 +30,120 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
- <!-- Sidebar Kiri -->
+
+<!-- Sidebar Kiri -->
 <aside class="sidebar">
   <div class="logo">Notudesk</div>
 
   <nav class="side-menu">
-      <a href="dashboardpeserta.html" class="side-link">Beranda</a>
-      <a href="notulen.html" class="side-link">Daftar Notulen</a>
-      <a href="favoritList.html" class="side-link">Favorit</a>
-      <a href="profil.html" class="side-link">Profil</a>
+      <a href="dashboardpeserta.php" class="side-link">Beranda</a>
+      <a href="notulen.php" class="side-link">Daftar Notulen</a>
+      <a href="favoritList.php" class="side-link">Favorit</a>
+      <a href="profil.php" class="side-link active">Profil</a>
   </nav>
+
   <button class="btn-logout" onclick="logout()">Keluar</button>
 </aside>
 
 <div class="content-area">
-<!-- 🔹 Konten Utama -->
-  <main class="page-container">
-    <div class="profile-grid">
 
-      <!-- Kiri -->
-      <aside class="profile-left card">
-        <h3>Profil Peserta</h3>
-        <div class="profile-info">
-          <img class="avatar" src="https://i.pravatar.cc/160?img=12" alt="avatar">
-          <div class="profile-text">
-            <h2>Dody Sinaga </h2>
-            <div class="chips">
-              <button class="chip">Peserta Rapat</button>
-              <button class="chip pink">Read-only</button>
-            </div>
+<main class="page-container">
+  <div class="profile-grid">
+
+    <!-- KIRI -->
+    <aside class="profile-left card">
+      <h3>Profil Peserta</h3>
+
+      <div class="profile-info">
+        <div class="avatar-initial"><?= $inisial; ?></div>
+
+        <div class="profile-text">
+          <h2><?= htmlspecialchars($user['username']); ?></h2>
+          <div class="chips">
+            <span class="chip">Peserta Rapat</span>
+            <span class="chip pink">Read-only</span>
           </div>
         </div>
+      </div>
 
-        <div class="info-section">
-          <label>Email</label>
-          <div class="info-row">
-            <input type="text" value="Dody@students.polibatam.com" readonly>
-            <button class="btn small ghost">Salin</button>
-          </div>
-
-          <label>Nomor Kontak</label>
-          <div class="info-row">
-            <input type="text" value="62+ 82123456" readonly>
-            <button class="btn small secondary">Ubah</button>
-          </div>
-        </div>
-      </aside>
-
-      <!-- Kanan -->
-      <section class="profile-right">
-        <div class="card stat-row">
-          <div class="stat-item">
-            <small>Total Notulen Dibintangi</small>
-            <h1>12</h1>
-          </div>
-          <div class="stat-item">
-            <small>Unduhan Bulan Ini</small>
-            <h1>8</h1>
-          </div>
-          <div class="stat-item">
-            <small>Preferensi</small>
-            <ul class="prefs">
-              <li>Tema antarmuka: <span class="muted-sm">Sistem</span></li>
-              <li>Bahasa aplikasi: <span class="muted-sm">Indonesia</span></li>
-              <li>Notifikasi email: <span class="muted-sm">Ringkasan harian</span></li>
-            </ul>
-          </div>
+      <div class="info-section">
+        <label>Email</label>
+        <div class="info-row">
+          <input type="text" value="<?= htmlspecialchars($user['email']); ?>" readonly>
+          <button class="btn small ghost"
+            onclick="navigator.clipboard.writeText('<?= $user['email']; ?>')">
+            Salin
+          </button>
         </div>
 
-        <div class="card">
-          <h3>Aktivitas Terbaru</h3>
-          <ul class="activity-list">
-            <li>
-              <div>
-                <strong>Menandai notulen "Weekly PMM" sebagai favorit</strong>
-                <p class="muted-sm">06 Sep 2025 • 09:10</p>
-              </div>
-              <button class="chip">Favorit</button>
-            </li>
-            <li>
-              <div>
-                <strong>Mengunduh notulen "Evaluasi Proyek X"</strong>
-                <p class="muted-sm">08 Sep 2025 • 11:05</p>
-              </div>
-              <button class="chip">Unduh</button>
-            </li>
-            <li>
-              <div>
-                <strong>Bergabung ke tim "Brand"</strong>
-                <p class="muted-sm">01 Sep 2025 • 14:22</p>
-              </div>
-              <button class="chip">Tim</button>
-            </li>
+        <label>Nomor Kontak</label>
+        <div class="info-row">
+          <input type="text" value="<?= htmlspecialchars($user['no_hp']); ?>" readonly>
+          <button class="btn small secondary" disabled>Ubah</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- KANAN -->
+    <section class="profile-right">
+
+      <div class="card stat-row">
+        <div class="stat-item">
+          <small>Total Notulen Dibintangi</small>
+          <h1>0</h1>
+        </div>
+        <div class="stat-item">
+          <small>Unduhan Bulan Ini</small>
+          <h1>1</h1>
+        </div>
+        <div class="stat-item">
+          <small>Preferensi</small>
+          <ul class="prefs">
+            <li>Tema antarmuka: <span class="muted-sm">Sistem</span></li>
+            <li>Bahasa aplikasi: <span class="muted-sm">Indonesia</span></li>
+            <li>Notifikasi email: <span class="muted-sm">Ringkasan harian</span></li>
           </ul>
         </div>
+      </div>
 
-        <div class="card">
-          <h3>Akses Cepat</h3>
-          <div class="quick-actions">
-            <button class="btn secondary full">Kelola perangkat terhubung</button>
-            <button class="btn secondary full"onclick="logout()">Keluar dari sesi</button>
+      <div class="card">
+        <h3>Aktivitas Terbaru</h3>
+        <ul class="activity-list">
+          <li>
+            <div>
+              <strong>Pemilihan Ketua OSIS</strong>
+              <p class="muted-sm">10 Des 2025 • 14:22</p>
+            </div>
+            <span class="chip">Tim</span>
+          </li>
+        </ul>
+      </div>
 
-          </div>
+      <div class="card">
+        <h3>Akses Cepat</h3>
+        <div class="quick-actions">
+          <button class="btn secondary full">Kelola perangkat terhubung</button>
+          <button class="btn secondary full" onclick="logout()">Keluar dari sesi</button>
         </div>
-      </section>
+      </div>
 
-    </div>
-  </main>
+    </section>
 
-  <footer class="footer-note">
-    <span>© 2025 NotulenApp</span>
-    <span>Dibuat oleh Dody Sinaga</span>
-  </footer>
-  <script>
-    const user = localStorage.getItem("username") || "Admin";
-    document.getElementById("username").textContent = user;
+  </div>
+</main>
 
-    function logout() {
-      alert("Anda telah keluar dari dashboard peserta.");
-      localStorage.removeItem("username");
-      window.location.href = "menu home.html";
-    }
-  </script>
+<footer class="footer-note">
+  <span>© 2025 NotulenApp</span>
+  <span>Dibuat oleh <?= htmlspecialchars($user['username']); ?></span>
+</footer>
+
+<script>
+function logout() {
+  if (confirm("Yakin ingin keluar?")) {
+    window.location.href = "logout.php";
+  }
+}
+</script>
+
 </body>
 </html>

@@ -1,3 +1,19 @@
+<?php session_start(); 
+include 'koneksi.php';
+
+$keyword = '';
+if (isset($_GET['search'])) {
+    $keyword = mysqli_real_escape_string($koneksi, $_GET['search']);
+}
+
+$sql = "SELECT * FROM isi_notulen 
+        WHERE judul LIKE '%$keyword%' 
+        OR isi LIKE '%$keyword%'
+        ORDER BY tanggal DESC";
+
+$data = mysqli_query($koneksi, $sql);
+?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -9,15 +25,16 @@
 </head>
 
 <body>
+ 
  <!-- Sidebar Kiri -->
 <aside class="sidebar">
   <div class="logo">Notudesk</div>
 
   <nav class="side-menu">
-      <a href="dashboardpeserta.html" class="side-link active">Beranda</a>
-      <a href="notulen.html" class="side-link">Daftar Notulen</a>
-      <a href="favoritList.html" class="side-link">Favorit</a>
-      <a href="profil.html" class="side-link">Profil</a>
+      <a href="dashboardpeserta.php" class="side-link active">Beranda</a>
+      <a href="notulen.php" class="side-link">Daftar Notulen</a>
+      <a href="favoritList.php" class="side-link">Favorit</a>
+      <a href="profil.php" class="side-link">Profil</a>
   </nav>
 
   <button class="btn-logout" onclick="logout()">Keluar</button>
@@ -29,78 +46,56 @@
     <!-- Hero Section -->
     <section class="card">
       <h2>Beranda — Peserta Rapat</h2>
-      <p>Selamat datang, <strong>Rani</strong>. Akses notulen rapat Anda.</p>
-      <input type="text" class="search-input" placeholder="Cari notulen, tanggal, atau kata kunci" />
-      <div class="chips">
-        <button class="chip">Semua</button>
-        <button class="chip">7 hari</button>
-        <button class="chip">30 hari</button>
-        <button class="chip">Aktif</button>
-      </div>
+      <p>Selamat datang<strong></strong>. Akses notulen rapat Anda.</p>
+      <form method="GET" action="">
+  <input 
+    type="text"
+    name="search"
+    class="search-input"
+    placeholder="Cari notulen, tanggal, atau kata kunci"
+    value="<?= htmlspecialchars($keyword); ?>">
+</form>
+
     </section>
 
     <!-- Notulen Terbaru -->
-    <section class="card">
-      <h3>Notulen Terbaru</h3>
-      <div class="grid">
-        <article class="mini-card card">
-          <h4>Kickoff Proyek Z <span class="tag tag-success">Aktif</span></h4>
-          <p class="muted-sm">02 Sep 2025 • 10:00</p>
-          <p>Poin: Target Q4 • Keputusan: Form tim inti</p>
-          <div class="mini-actions">
-            <button class="btn secondary">Lihat</button>
-            <button class="btn secondary">Unduh</button>
-          </div>
-        </article>
-
-        <article class="mini-card card">
-          <h4>Review Sprint 12 <span class="tag tag-success">Aktif</span></h4>
-          <p class="muted-sm">29 Agt 2025 • 14:00</p>
-          <p>Poin: Bug critical • Keputusan: Tambah resource</p>
-          <div class="mini-actions">
-            <button class="btn secondary">Lihat</button>
-            <button class="btn secondary">Unduh</button>
-          </div>
-        </article>
-
-        <article class="mini-card card empty">
-          <p class="muted">Belum ada notulen terbaru.</p>
-        </article>
-      </div>
-    </main>
-    <!-- Detail Notulen -->
-    <section class="card">
-      <h3>Detail Notulen</h3>
-      <p><strong>Evaluasi Proyek X</strong> — 08 Sep 2025 • 10:30</p>
-      <div class="chips">
-        <button class="chip">Unduh Notulen</button>
-        <button class="chip">Bagikan</button>
-        <button class="chip">Tandai Favorit</button>
-        <button class="chip">Konfirmasi Dibaca</button>
-      </div>
-
-      <div class="card inner-card">
-        <h4>Poin Penting</h4>
-        <ul>
-          <li>Update progress setiap tim</li>
-          <li>Isu kritikal dan solusi</li>
-        </ul>
-        <h4>Keputusan</h4>
-        <p>Menambah resource tim QA</p>
-        <h4>Tindak Lanjut</h4>
-        <ul>
-          <li>Rani — Rancang mitigasi (12 Sep 2025)</li>
-          <li>Dika — Tambah resource (14 Sep 2025)</li>
-        </ul>
-        <h4>Lampiran</h4>
-        <ul>
-          <li>notulen-evaluasi.pdf (320 KB)</li>
-          <li>agenda-rapat.pdf (145 KB)</li>
-        </ul>
-        <p class="muted-sm">Riwayat distribusi: Dikirim 12 Sep 2025, 10:45</p>
-      </div>
-    </section>
     
+<?php if (isset($_GET['search']) && $_GET['search'] != ''): ?>
+
+<section class="cards-list">
+
+  <?php if (mysqli_num_rows($data) > 0): ?>
+    <?php while ($row = mysqli_fetch_assoc($data)): ?>
+
+      <div class="notulen-card"
+           onclick="window.location.href='detailnotulen_peserta.php?id=<?= $row['id']; ?>'">
+
+        <!-- KIRI -->
+        <div class="meta">
+          <h3><?= htmlspecialchars($row['judul']); ?></h3>
+          <p class="muted-sm">
+            <?= substr(strip_tags($row['isi']), 0, 80); ?>...
+          </p>
+        </div>
+
+        <!-- KANAN -->
+        <div class="right">
+          <small class="muted-sm">
+            <?= date('d M Y', strtotime($row['tanggal'])); ?>
+          </small>
+        </div>
+
+      </div>
+
+    <?php endwhile; ?>
+  <?php else: ?>
+    <p class="muted-sm" style="text-align:center;">Notulen tidak ditemukan</p>
+  <?php endif; ?>
+
+</section>
+
+<?php endif; ?>
+
 
   <footer class="footer-note">
     <p>© 2025 Notudesk </p>
@@ -112,8 +107,16 @@
     function logout() {
       alert("Anda telah keluar dari dashboard peserta.");
       localStorage.removeItem("username");
-      window.location.href = "menu home.html";
+      window.location.href = "menu home.php";
     }
   </script>
+
+  
+  <?php if(isset($_SESSION['notif'])): ?>
+    <script>
+     alert("<?=$_SESSION['notif']?>");
+    </script>
+  <?php unset($_SESSION['notif']); endif; ?>
+
 </body>
 </html>

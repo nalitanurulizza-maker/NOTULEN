@@ -1,3 +1,43 @@
+<?php
+session_start();
+include 'koneksi.php';
+
+// ==========================
+// JUMLAH PENGGUNA
+// ==========================
+$qUser = mysqli_query($koneksi, "SELECT COUNT(*) AS total FROM user");
+$user = mysqli_fetch_assoc($qUser);
+
+// ==========================
+// JUMLAH NOTULEN
+// ==========================
+$qNotulen = mysqli_query($koneksi, "SELECT COUNT(*) AS total FROM isi_notulen");
+$notulen = mysqli_fetch_assoc($qNotulen);
+
+// ==========================
+// LAPORAN MINGGU INI (7 HARI)
+// ==========================
+$qLaporan = mysqli_query($koneksi, "
+    SELECT COUNT(*) AS total 
+    FROM isi_notulen 
+    WHERE tanggal >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+");
+$laporan = mysqli_fetch_assoc($qLaporan);
+
+$qAktivitas = mysqli_query($koneksi, "
+    SELECT 
+        u.username, 
+        a.kegiatan, 
+        a.tanggal
+    FROM aktivitas a
+    JOIN user u ON a.user_id = u.id
+    ORDER BY a.tanggal DESC
+    LIMIT 5
+");
+
+?>
+
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -18,11 +58,9 @@
     .sidebar {
       width: 250px;
       height: 100vh;
-      background-color: #0d6efd;
+      background: linear-gradient(135deg, #60a5fa, #93c5fd);
+      color: #fff;
       position: fixed;
-      left: 0;
-      top: 0;
-      color: white;
       padding: 25px 20px;
       display: flex;
       flex-direction: column;
@@ -77,18 +115,18 @@
 <body>
 
   <!-- SIDEBAR -->
-  <aside class="sidebar d-flex flex-column">
-    <h2 class="fw-bold mb-4">📝 NOTUDEKS</h2>
+  <div class="sidebar">
+    <h2>📝 NOTUDEKS</h2>
 
-    <a href="#" class="active">📊 Dashboard</a>
+    <a href="dashboard_admin.php" class="active">📊 Dashboard</a>
     <a href="buat-notulen.php">📝 Buat Notulen</a>
+    <a href="tambah_peserta.php">👥 Tambah Peserta</a>
     <a href="daftar-notulen.php">📁 Daftar Notulen</a>
     <a href="arsip.php">📂 Arsip</a>
     <a href="pengaturan.php">⚙️ Pengaturan</a>
 
-    <div class="logout-btn mt-auto" onclick="logout()">🚪 Keluar</div>
-  </aside>
-
+    <a class="logout-btn btn-danger" onclick="logout()">🚪 Keluar</a>  
+</div>
   <!-- MAIN CONTENT -->
   <main class="main-content">
     
@@ -100,21 +138,21 @@
       <div class="col-md-4">
         <div class="card p-3 shadow-sm card-custom">
           <h3 class="h5 text-success">👥 Pengguna</h3>
-          <p>Jumlah pengguna terdaftar: <b>25</b></p>
+          <p>Jumlah pengguna terdaftar: <b><?= $user['total']; ?></b></p>
         </div>
       </div>
 
       <div class="col-md-4">
         <div class="card p-3 shadow-sm card-custom">
           <h3 class="h5 text-success">🗒️ Notulen</h3>
-          <p>Total notulen tersimpan: <b>12</b></p>
+          <p>Total notulen tersimpan: <b><?= $notulen['total']; ?></b></p>
         </div>
       </div>
 
       <div class="col-md-4">
         <div class="card p-3 shadow-sm card-custom">
           <h3 class="h5 text-success">📊 Laporan</h3>
-          <p>Laporan minggu ini: <b>5</b></p>
+          <p>Laporan minggu ini: <b><?= $laporan['total']; ?></b></p>
         </div>
       </div>
     </div>
@@ -131,11 +169,17 @@
             <th>Tanggal</th>
           </tr>
         </thead>
-        <tbody>
-          <tr><td>Dody</td><td>Menambahkan notulen rapat</td><td>06 Okt 2025</td></tr>
-          <tr><td>Nalita</td><td>Memperbarui laporan mingguan</td><td>05 Okt 2025</td></tr>
-          <tr><td>Andi</td><td>Menambah anggota tim</td><td>04 Okt 2025</td></tr>
-        </tbody>
+       <tbody>
+<?php while ($data = mysqli_fetch_assoc($qAktivitas)) { ?>
+<tr>
+  <td><?= htmlspecialchars($data['username']) ?></td>
+  <td><?= htmlspecialchars($data['kegiatan']) ?></td>
+  <td><?= date('d M Y H:i', strtotime($data['tanggal'])) ?></td>
+</tr>
+<?php } ?>
+</tbody>
+
+
       </table>
     </div>
 
@@ -147,6 +191,11 @@
       window.location.href = "menu home.php";
     }
   </script>
+<?php if(isset($_SESSION['notif'])): ?>
+<script>
+  alert("<?=$_SESSION['notif']?>");
+</script>
+<?php unset($_SESSION['notif']); endif; ?>
 
 </body>
 </html>

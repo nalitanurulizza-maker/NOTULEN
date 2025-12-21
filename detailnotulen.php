@@ -1,68 +1,60 @@
+<?php
+include "koneksi.php";
+
+if (!isset($_GET['id'])) {
+    die("ID tidak ditemukan!");
+}
+
+$id = $_GET['id'];
+
+$sql = "SELECT * FROM isi_notulen WHERE id = $id";
+$result = mysqli_query($koneksi, $sql);
+$data = mysqli_fetch_assoc($result);
+
+if (!$data) {
+    die("Data tidak ditemukan!");
+}
+?>
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Notulen — Beranda Peserta</title>
-  <link rel="stylesheet" href="style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>Detail Notulen</title>
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
 </head>
+<body class="container mt-4">
 
-<body>
-  <!-- 🔹 Navbar -->
-  <header class="navbar">
-    <div class="logo"> Notudesk</div>
-    <div class="actions">
-      <button class="btn secondary">kembali</button>
-    </div>
-  </header>
+    <h2>Detail Notulen</h2>
+    <hr>
 
-  <!-- 🔹 Main Content -->
-  <main class="page-container">
-  
-   
-     
-    <!-- Detail Notulen -->
-    <section class="card">
-      <h3>Detail Notulen</h3>
-      <p><strong>Evaluasi Proyek X</strong> — 08 Sep 2025 • 10:30</p>
-      <div class="chips">
-        <button class="chip">Unduh Notulen</button>
-        <button class="chip">Bagikan</button>
-        <button class="chip">Tandai Favorit</button>
-        <button class="chip">Konfirmasi Dibaca</button>
-      </div>
+    <p><strong>Judul:</strong> <?= $data['judul'] ?></p>
 
-      <div class="card inner-card">
-        <h4>Poin Penting</h4>
-        <ul>
-          <li>Update progress setiap tim</li>
-          <li>Isu kritikal dan solusi</li>
-        </ul>
-        <h4>Keputusan</h4>
-        <p>Menambah resource tim QA</p>
-        <h4>Tindak Lanjut</h4>
-        <ul>
-          <li>Rani — Rancang mitigasi (12 Sep 2025)</li>
-          <li>Dika — Tambah resource (14 Sep 2025)</li>
-        </ul>
-        <h4>Lampiran</h4>
-        <ul>
-          <li>notulen-evaluasi.pdf (320 KB)</li>
-          <li>agenda-rapat.pdf (145 KB)</li>
-        </ul>
-        <p class="muted-sm">Riwayat distribusi: Dikirim 12 Sep 2025, 10:45</p>
-      </div>
-    </section>
+    <p><strong>Tanggal:</strong> <?= $data['tanggal'] ?></p>
 
-   
-    
-  </main>
+    <p><strong>Waktu:</strong> 
+        <?= !empty($data['waktu']) ? $data['waktu'] : "<i>Tidak ada waktu</i>" ?>
+    </p>
 
-  <footer class="footer-note">
-    <p>© 2025 Notudesk </p>
-  </footer>
-  
-  </script>
+    <p><strong>Status:</strong> <?= $data['status'] ?></p>
+
+    <p><strong>Isi Notulen:</strong><br>
+        <?= nl2br($data['isi']) ?>
+    </p>
+
+    <hr>
+
+    <h4>Lampiran</h4>
+
+    <?php if (!empty($data['lampiran'])): ?>
+        <a class="btn btn-primary" href="lampiran/<?= $data['lampiran'] ?>" target="_blank">
+            Download Lampiran
+        </a>
+    <?php else: ?>
+        <p><i>Tidak ada lampiran.</i></p>
+    <?php endif; ?>
+
+    <hr>
+
+    <a href="daftar-notulen.php" class="btn btn-secondary">Kembali</a>
+
 </body>
 </html>

@@ -1,58 +1,145 @@
-<html lang="en"> 
-<head> 
-  <meta charset="utf-8"> 
-  <meta name="viewport" content="width=device-width, initial-scale=1"> 
-  <title>Login Page</title> 
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"> 
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fontawesome/6.0.0/css/all.min.css"> 
-  <style> 
-    body { 
-      background: linear-gradient(135deg, #2563eb, #3b82f6, #60a5fa); 
-    } 
-    .register-container { 
-      max-width: 400px;  
-      margin: auto;  
-      margin-top: 100px;  
-      padding: 20px;  
-      background: white;  
-      border-radius: 8px;  
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);  
-    } 
-    .register-container h2 { 
-      margin-bottom: 20px;  
-    } 
-  </style> 
+<?php
+include 'koneksi.php';
+
+$success = "";
+$error = "";
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+
+    $username = mysqli_real_escape_string($koneksi, $_POST['username']);
+    $email    = mysqli_real_escape_string($koneksi, $_POST['email']);
+    $no_hp    = mysqli_real_escape_string($koneksi, $_POST['no_hp']);
+    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+    $role     = mysqli_real_escape_string($koneksi, $_POST['role']);
+
+    // Cek username
+    $check = mysqli_query($koneksi, "SELECT id FROM user WHERE username='$username'");
+    if (mysqli_num_rows($check) > 0) {
+        $error = "Username sudah digunakan!";
+    } else {
+        $query = mysqli_query($koneksi, "
+            INSERT INTO user (username, email, no_hp, password, role)
+            VALUES ('$username', '$email', '$no_hp', '$password', '$role')
+        ");
+
+        if ($query) {
+            $success = "Pendaftaran berhasil! Silakan login.";
+            header("refresh:2; url=menu home.php");
+        } else {
+            $error = "Gagal mendaftar!";
+        }
+    }
+}
+?>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Register</title>
+<style>
+*{box-sizing:border-box}
+body{
+    font-family:Arial, sans-serif;
+    background:#e9efff;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+.register-box{
+    width:100%;
+    max-width:420px;
+    background:#fff;
+    padding:30px;
+    border-radius:12px;
+    box-shadow:0 10px 25px rgba(0,0,0,.1);
+}
+.register-box h2{
+    text-align:center;
+    margin-bottom:20px;
+}
+label{
+    font-size:14px;
+    font-weight:bold;
+}
+input, select{
+    width:100%;
+    padding:10px;
+    margin:6px 0 14px;
+    border:1px solid #ccc;
+    border-radius:6px;
+}
+input:focus, select:focus{
+    outline:none;
+    border-color:#3b82f6;
+}
+button{
+    width:100%;
+    padding:10px;
+    background:#60a5fa;
+    color:#fff;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+}
+button:hover{
+    background:#3b82f6;
+}
+.alert{
+    padding:8px;
+    margin-bottom:12px;
+    color:#fff;
+    text-align:center;
+    border-radius:5px;
+}
+.error{background:#ef4444}
+.success{background:#22c55e}
+.login-link{
+    text-align:center;
+    margin-top:15px;
+}
+</style>
 </head>
- <body> 
-  <div class="register-container"> 
-    <h5 class="text-right">Form Register</h5>
-    <h2 class="text-center"> NOTUDESK</h2> 
-    <form> 
-      <div class="mb-3"> 
-        <label for="username" class="form-label">Username</label> 
-        <div class="input-group"> 
-          <span class="input-group-text"><i class="fas fa-user"></i></span> 
-          <input type="text" class="form-control" id="username" placeholder="Masukkan username" required> 
-        </div> 
-      </div> 
-      <div class="mb-3"> 
-        <label for="password" class="form-label">Password</label> 
-        <div class="input-group"> 
-          <span class="input-group-text"><i class="fas fa-lock"></i></span> 
-          <input type="password" class="form-control" id="password" placeholder="Masukkan password" required> 
-        </div> 
-      </div> 
-      <div class="mb-3 form-check"> 
-        <input type="checkbox" class="form-check-input" id="rememberMe"> 
-        <label class="form-check-label" for="rememberMe">Ingat Saya</label> 
-      </div> 
-      <button type="submit" class="btn btn-primary w-100"><i class="fas fa-sign-inalt"></i> Masuk</button> 
-    </form> 
-    <p class="text-center mt-3"> 
-      <a href="#" class="link-primary">Lupa Password?</a> 
-    </p> 
-    <p class="text-center">Belum punya akun? <a href="#" class="link-primary">Daftar Sekarang</a></p> 
-  </div> 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<body>
+
+<div class="register-box">
+<h2>Register</h2>
+
+<?php if ($error): ?>
+<div class="alert error"><?= $error ?></div>
+<?php endif; ?>
+
+<?php if ($success): ?>
+<div class="alert success"><?= $success ?></div>
+<?php endif; ?>
+
+<form method="POST">
+    <label>Username</label>
+    <input type="text" name="username" required>
+
+    <label>Email</label>
+    <input type="email" name="email" required>
+
+    <label>No HP</label>
+    <input type="text" name="no_hp" required>
+
+    <label>Password</label>
+    <input type="password" name="password" required>
+
+    <label>Role</label>
+    <select name="role" required>
+        <option value="">-- Pilih Role --</option>
+        <option value="admin">Admin</option>
+        <option value="peserta">Peserta</option>
+    </select>
+
+    <button type="submit">Daftar</button>
+</form>
+
+<div class="login-link">
+    Sudah punya akun? <a href="menu home.php">Login</a>
+</div>
+</div>
+
 </body>
 </html>

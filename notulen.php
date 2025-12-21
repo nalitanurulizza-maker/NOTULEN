@@ -1,100 +1,104 @@
+<?php
+session_start();
+include 'koneksi.php';
+
+$user_id = $_SESSION['user_id'];
+$data = mysqli_query($koneksi, 
+"SELECT * FROM isi_notulen WHERE status='aktif' ORDER BY id DESC");
+
+// Ambil hanya notulen yang TERBIT (status aktif)
+$data = mysqli_query($koneksi, 
+"SELECT * FROM isi_notulen WHERE status = 'aktif' ORDER BY id DESC");
+?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Notulen — Daftar Notulen</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Sidebar Kiri -->
+
+<!-- Sidebar -->
 <aside class="sidebar">
   <div class="logo">Notudesk</div>
 
   <nav class="side-menu">
-      <a href="dashboardpeserta.html" class="side-link">Beranda</a>
-      <a href="notulen.html" class="side-link">Daftar Notulen</a>
-      <a href="favoritList.html" class="side-link">Favorit</a>
-      <a href="profil.html" class="side-link">Profil</a>
+      <a href="dashboardpeserta.php" class="side-link">Beranda</a>
+      <a href="notulen.php" class="side-link">Daftar Notulen</a>
+      <a href="favoritList.php" class="side-link">Favorit</a>
+      <a href="profil.php" class="side-link">Profil</a>
   </nav>
 
   <button class="btn-logout" onclick="logout()">Keluar</button>
 </aside>
 
 <div class="content-area">
-
   <main class="container-wide page">
-    
     <section class="notulen-area">
       <div class="card">
+
         <div class="section-head">
           <h2>Daftar Notulen</h2>
-          <div class="right-controls">
-            <input placeholder="Pencarian global" />
-            <button class="btn secondary">Urutkan</button>
-          </div>
         </div>
 
         <div class="cards-list">
-          <!-- item -->
-          <article class="card notulen-card">
-            <div class="meta">
-              <span class="tag tag-success">Final</span>
-              <h3>Evaluasi Proyek X</h3>
-              <p class="muted-sm">Keputusan: Lanjut implementasi fase 2 • Tindak lanjut: Dika</p>
-            </div>
-            <div class="right">
-              <p class="muted-sm">08 Sep 2025 • 10:30</p>
-              <div class="card-actions">
-                <button class="icon-btn btn-download">⬇️</button>
-                <button class="icon-btn btn-share">🔗</button>
-              </div>
-            </div>
-          </article>
 
-          <article class="card notulen-card">
-            <div class="meta">
-              <span class="tag tag-warning">Draft</span>
-              <h3>Weekly PMM</h3>
-              <p class="muted-sm">Poin: Update kampanye Q4 • Tindak lanjut: Rani</p>
-            </div>
-            <div class="right">
-              <p class="muted-sm">06 Sep 2025 • 09:00</p>
-              <div class="card-actions">
-                <button class="icon-btn btn-download">⬇️</button>
-                <button class="icon-btn btn-share">🔗</button>
-              </div>
-            </div>
-          </article>
+          <?php if (mysqli_num_rows($data) > 0) { ?>
+            <?php while ($row = mysqli_fetch_assoc($data)) { ?>
 
-          <article class="card notulen-card">
-            <div class="meta">
-              <span class="tag tag-success">Final</span>
-              <h3>1:1 Dika & Rani</h3>
-              <p class="muted-sm">Keputusan: Penyesuaian timeline • Tindak lanjut: Dika</p>
-            </div>
-            <div class="right">
-              <p class="muted-sm">01 Sep 2025 • 16:00</p>
-              <div class="card-actions">
-                <button class="icon-btn btn-download">⬇️</button>
-                <button class="icon-btn btn-share">🔗</button>
-              </div>
-            </div>
-          </article>
+              <a href="detailnotulen_peserta.php?id=<?= $row['id']; ?>" 
+                 class="card notulen-card"
+                 style="display:block; text-decoration:none; color:inherit;">
+
+                <div class="meta">
+                  <span class="tag tag-success">Final</span>
+                  <h3><?= htmlspecialchars($row['judul']); ?></h3>
+                  <p class="muted-sm"><?= substr($row['isi'], 0, 100); ?>...</p>
+                </div>
+
+                <div class="right">
+                  <p class="muted-sm">
+                    <?= $row['tanggal']; ?> • <?= $row['waktu']; ?>
+                  </p>
+
+                  <div class="card-actions">
+
+  <!-- TOMBOL FAVORIT -->
+  <form action="favorit_add.php" method="POST" style="display:inline;">
+    <input type="hidden" name="notulen_id" value="<?= $row['id']; ?>">
+    <button type="submit" class="icon-btn" title="Tambah ke favorit">
+      ⭐
+    </button>
+  </form>
+
+  <?php if (!empty($row['lampiran'])) { ?>
+    <a href="upload/<?= $row['lampiran']; ?>" 
+       class="icon-btn btn-download" download>
+       ⬇️
+    </a>
+  <?php } ?>
+
+</div>
+
+                </div>
+
+              </a>
+
+            <?php } ?>
+          <?php } else { ?>
+            <p style="padding:20px;color:#777;text-align:center;">
+              Belum ada notulen yang diterbitkan.
+            </p>
+          <?php } ?>
+
         </div>
 
-        <div class="pagination">
-          <p>Menampilkan 1–10 dari 32</p>
-          <div>
-            <button class="btn secondary">⟨ Sebelumnya</button>
-            <button class="btn secondary">Berikutnya ⟩</button>
-          </div>
-        </div>
       </div>
     </section>
   </main>
+</div>
 
-  <div id="modal-root"></div>
-  <script src="script.js"></script>
 </body>
 </html>
