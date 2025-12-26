@@ -101,3 +101,24 @@ ORDER BY favorite.id DESC
 
   </main>
 </div>
+<script>
+    const user = localStorage.getItem("username") || "Admin";
+    document.getElementById("username").textContent = user;
+
+    function logout() {
+      alert("Anda telah keluar dari dashboard peserta.");
+      localStorage.removeItem("username");
+      window.location.href = "menu home.php";
+    }
+  </script>
+
+  
+  <?php if(isset($_SESSION['notif'])): ?>
+    <script>
+     alert("<?=$_SESSION['notif']?>");
+    </script>
+  <?php unset($_SESSION['notif']); endif; ?>
+
+</body>
+</html>
+

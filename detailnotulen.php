@@ -45,8 +45,7 @@ if (!$data) {
     <h4>Lampiran</h4>
 
     <?php if (!empty($data['lampiran'])): ?>
-        <a class="btn btn-primary" href="lampiran/<?= $data['lampiran'] ?>" target="_blank">
-            Download Lampiran
+        <a href="download.php?file=<?= urlencode($data['lampiran']) ?>" class="btn btn-primary">Download Lampiran</a>
         </a>
     <?php else: ?>
         <p><i>Tidak ada lampiran.</i></p>

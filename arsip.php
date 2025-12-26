@@ -123,11 +123,6 @@ $data = mysqli_query($koneksi,
 
                 <td>
                   <a href="detailnotulen.php?id=<?= $row['id']; ?>" class="btn btn-sm btn-primary">Lihat</a>
-
-                  <?php if (!empty($row['lampiran'])) { ?>
-                    <a href="upload/<?= $row['lampiran']; ?>" class="btn btn-sm btn-success" download>Unduh</a>
-                  <?php } ?>
-
                   <a href="edit-notulen.php?id=<?= $row['id']; ?>" class="btn btn-sm btn-warning">Edit</a>
 
                   <!-- PULIHKAN -->

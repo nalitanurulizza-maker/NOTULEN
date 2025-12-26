@@ -112,7 +112,7 @@ if (!$row) {
       <?php if (!empty($row['lampiran'])) { ?>
         <div class="lampiran-box">
           📎 <strong>Lampiran:</strong><br>
-          <a href="upload/<?= $row['lampiran']; ?>" download>
+          <a href="uploads/<?= htmlspecialchars($row['lampiran']); ?>" download>
             Klik di sini untuk download lampiran
           </a>
         </div>

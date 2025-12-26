@@ -1,15 +1,33 @@
 <?php session_start(); 
 include 'koneksi.php';
+if (!isset($_SESSION['username']) || $_SESSION['role'] !== 'peserta') {
+    header("Location: menu home.php");
+    exit();
+}
 
 $keyword = '';
 if (isset($_GET['search'])) {
     $keyword = mysqli_real_escape_string($koneksi, $_GET['search']);
 }
 
-$sql = "SELECT * FROM isi_notulen 
-        WHERE judul LIKE '%$keyword%' 
-        OR isi LIKE '%$keyword%'
-        ORDER BY tanggal DESC";
+$peserta_id = $_SESSION['peserta_id'] ?? 0;
+if ($peserta_id == 0) {
+    die("Peserta belum login.");
+}
+
+$sql = "
+    SELECT n.*
+    FROM isi_notulen n
+    JOIN notulen_peserta np ON n.id = np.notulen_id
+    WHERE np.peserta_id = '$peserta_id'
+    AND (
+        n.judul LIKE '%$keyword%' 
+        OR n.isi LIKE '%$keyword%'
+    )
+    AND n.status = 'aktif'
+    ORDER BY n.tanggal DESC
+";
+
 
 $data = mysqli_query($koneksi, $sql);
 ?>

@@ -1,32 +1,31 @@
 <?php
 session_start();
-include 'koneksi.php';
+include 'koneksi.php'; // tetap sama
 
 $error = null;
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $user = mysqli_real_escape_string($koneksi, $_POST['user']);
     $pass = $_POST['pass'];
 
-    // Ambil user berdasarkan username SAJA
-    $query = mysqli_query($koneksi, "SELECT * FROM user WHERE username='$user'");
+    $query = mysqli_query($koneksi, "SELECT * FROM user WHERE username='$user' LIMIT 1");
 
-    if (mysqli_num_rows($query) == 1) {
-        $row = mysqli_fetch_assoc($query);
+    if ($row = mysqli_fetch_assoc($query)) {
 
-        // CEK PASSWORD HASH
         if (password_verify($pass, $row['password'])) {
 
-            $_SESSION['user_id'] = $row['id'];
-            $_SESSION['user']    = $row['username'];
-            $_SESSION['role']    = $row['role'];
+            // ================= SESSION =================
+            $_SESSION['login']      = true; 
+            $_SESSION['username']   = $row['username']; // penting untuk dashboard
+            $_SESSION['user_id']    = $row['id'];
+            $_SESSION['role']       = $row['role'];
 
-            // Redirect sesuai role
-            if ($row['role'] == 'admin') {
+            if ($row['role'] === 'admin') {
                 $_SESSION['notif'] = "Selamat datang Admin!";
                 header("Location: dashboard_admin.php");
                 exit();
-            } elseif ($row['role'] == 'peserta') {
+            } elseif ($row['role'] === 'peserta') {
+                $_SESSION['peserta_id'] = $row['id'];
                 $_SESSION['notif'] = "Login berhasil, selamat datang!";
                 header("Location: dashboardpeserta.php");
                 exit();
@@ -43,6 +42,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="id">

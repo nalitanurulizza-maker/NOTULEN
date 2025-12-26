@@ -1,22 +1,25 @@
 <?php
 session_start();
-include 'koneksi.php';
+include 'koneksi.php'; // tetap sama
+
+// cek login
+if (!isset($_SESSION['username']) || $_SESSION['role'] !== 'admin') {
+    header("Location: menu home.php");
+    exit();
+}
 
 // ==========================
 // JUMLAH PENGGUNA
-// ==========================
 $qUser = mysqli_query($koneksi, "SELECT COUNT(*) AS total FROM user");
 $user = mysqli_fetch_assoc($qUser);
 
 // ==========================
 // JUMLAH NOTULEN
-// ==========================
 $qNotulen = mysqli_query($koneksi, "SELECT COUNT(*) AS total FROM isi_notulen");
 $notulen = mysqli_fetch_assoc($qNotulen);
 
 // ==========================
 // LAPORAN MINGGU INI (7 HARI)
-// ==========================
 $qLaporan = mysqli_query($koneksi, "
     SELECT COUNT(*) AS total 
     FROM isi_notulen 
@@ -34,7 +37,6 @@ $qAktivitas = mysqli_query($koneksi, "
     ORDER BY a.tanggal DESC
     LIMIT 5
 ");
-
 ?>
 
 
@@ -125,7 +127,8 @@ $qAktivitas = mysqli_query($koneksi, "
     <a href="arsip.php">📂 Arsip</a>
     <a href="pengaturan.php">⚙️ Pengaturan</a>
 
-    <a class="logout-btn btn-danger" onclick="logout()">🚪 Keluar</a>  
+    <a class="logout-btn btn-danger" href="logout.php">🚪 Keluar</a>
+  
 </div>
   <!-- MAIN CONTENT -->
   <main class="main-content">
@@ -185,12 +188,7 @@ $qAktivitas = mysqli_query($koneksi, "
 
   </main>
 
-  <script>
-    function logout() {
-      alert("Anda telah keluar dari dashboard admin.");
-      window.location.href = "menu home.php";
-    }
-  </script>
+ 
 <?php if(isset($_SESSION['notif'])): ?>
 <script>
   alert("<?=$_SESSION['notif']?>");

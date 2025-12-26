@@ -146,7 +146,7 @@
                 <td><?= htmlspecialchars($data['nama']); ?></td>
                 <td><?= htmlspecialchars($data['email']); ?></td>
                 <td class="text-center">
-                  <input type="checkbox" name="hadir[]" value="<?= $data['id']; ?>">
+                 <input type="checkbox" name="peserta[]" value="<?= $data['id']; ?>">
                 </td>
               </tr>
             <?php } ?>

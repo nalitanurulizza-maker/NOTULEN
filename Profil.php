@@ -94,15 +94,7 @@ $inisial = strtoupper(substr($user['username'], 0, 1));
         </div>
         <div class="stat-item">
           <small>Unduhan Bulan Ini</small>
-          <h1>1</h1>
-        </div>
-        <div class="stat-item">
-          <small>Preferensi</small>
-          <ul class="prefs">
-            <li>Tema antarmuka: <span class="muted-sm">Sistem</span></li>
-            <li>Bahasa aplikasi: <span class="muted-sm">Indonesia</span></li>
-            <li>Notifikasi email: <span class="muted-sm">Ringkasan harian</span></li>
-          </ul>
+          <h1>0</h1>
         </div>
       </div>
 
@@ -133,8 +125,7 @@ $inisial = strtoupper(substr($user['username'], 0, 1));
 </main>
 
 <footer class="footer-note">
-  <span>© 2025 NotulenApp</span>
-  <span>Dibuat oleh <?= htmlspecialchars($user['username']); ?></span>
+  <span>© 2025 Notudeks</span>
 </footer>
 
 <script>
