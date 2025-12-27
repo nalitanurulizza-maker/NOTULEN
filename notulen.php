@@ -6,7 +6,6 @@ $user_id = $_SESSION['user_id'];
 $data = mysqli_query($koneksi, 
 "SELECT * FROM isi_notulen WHERE status='aktif' ORDER BY id DESC");
 
-// Ambil hanya notulen yang TERBIT (status aktif)
 $data = mysqli_query($koneksi, 
 "SELECT * FROM isi_notulen WHERE status = 'aktif' ORDER BY id DESC");
 ?>

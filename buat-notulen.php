@@ -4,8 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Buat / Edit Notulen</title>
-
-  <!-- Bootstrap -->
   <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" />
 
   <style>
@@ -146,7 +144,7 @@
                 <td><?= htmlspecialchars($data['nama']); ?></td>
                 <td><?= htmlspecialchars($data['email']); ?></td>
                 <td class="text-center">
-                 <input type="checkbox" name="peserta[]" value="<?= $data['id']; ?>">
+                <a href="hapuspeserta-buat.php?id=<?= $data['id']; ?>"class="btn btn-danger btn-sm"onclick="return confirm('Yakin ingin menghapus peserta ini?')"> 🗑 Hapus</a>
                 </td>
               </tr>
             <?php } ?>

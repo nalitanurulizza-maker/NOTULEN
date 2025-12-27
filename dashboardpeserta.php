@@ -73,7 +73,6 @@ $data = mysqli_query($koneksi, $sql);
     placeholder="Cari notulen, tanggal, atau kata kunci"
     value="<?= htmlspecialchars($keyword); ?>">
 </form>
-
     </section>
 
     <!-- Notulen Terbaru -->

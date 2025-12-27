@@ -1,25 +1,21 @@
 <?php
 session_start();
-include 'koneksi.php'; // tetap sama
+include 'koneksi.php'; 
 
-// cek login
 if (!isset($_SESSION['username']) || $_SESSION['role'] !== 'admin') {
     header("Location: menu home.php");
     exit();
 }
 
-// ==========================
-// JUMLAH PENGGUNA
+// JUMLAH PENGGUNA //
 $qUser = mysqli_query($koneksi, "SELECT COUNT(*) AS total FROM user");
 $user = mysqli_fetch_assoc($qUser);
 
-// ==========================
-// JUMLAH NOTULEN
+// JUMLAH NOTULEN //
 $qNotulen = mysqli_query($koneksi, "SELECT COUNT(*) AS total FROM isi_notulen");
 $notulen = mysqli_fetch_assoc($qNotulen);
 
-// ==========================
-// LAPORAN MINGGU INI (7 HARI)
+// LAPORAN MINGGU INI (7 HARI) //
 $qLaporan = mysqli_query($koneksi, "
     SELECT COUNT(*) AS total 
     FROM isi_notulen 

@@ -68,7 +68,6 @@ ORDER BY favorite.id DESC
     <?= substr($row['isi'], 0, 100); ?>...
   </p>
 
-  <!-- INI BAGIAN PENTING -->
   <div class="card-footer">
     <small><?= $row['tanggal']; ?> • <?= $row['waktu']; ?></small>
 

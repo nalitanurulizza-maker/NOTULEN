@@ -1,6 +1,6 @@
 <?php
 session_start();
-include 'koneksi.php'; // tetap sama
+include 'koneksi.php';
 
 $error = null;
 
@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             // ================= SESSION =================
             $_SESSION['login']      = true; 
-            $_SESSION['username']   = $row['username']; // penting untuk dashboard
+            $_SESSION['username']   = $row['username']; 
             $_SESSION['user_id']    = $row['id'];
             $_SESSION['role']       = $row['role'];
 
@@ -52,8 +52,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Notulen Rapat | Kirim</title>
   <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
-
-  <!-- Icon -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');

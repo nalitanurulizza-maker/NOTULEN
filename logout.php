@@ -1,8 +1,8 @@
 <?php
 session_start();
-session_unset();  // hapus semua session
-session_destroy(); // hancurkan session
+session_unset();  
+session_destroy();
 
-header("Location: menu home.php"); // arahkan kembali ke halaman login / home
+header("Location: menu home.php"); 
 exit();
 ?>

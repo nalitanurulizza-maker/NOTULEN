@@ -1,20 +1,17 @@
 <?php
 include 'koneksi.php';
 
-// Pastikan user membuka halaman dengan ID
 if (!isset($_GET['id'])) {
     die("Notulen tidak ditemukan.");
 }
 
 $id = $_GET['id'];
 
-// Ambil notulen berdasarkan ID dan hanya jika statusnya 'aktif'
 $query = mysqli_query($koneksi, 
 "SELECT * FROM isi_notulen WHERE id = '$id' AND status = 'aktif'");
 
 $row = mysqli_fetch_assoc($query);
 
-// Jika tidak ada data → tampilkan pesan
 if (!$row) {
     die("<h2 style='font-family:sans-serif; padding:20px;'>Notulen tidak ditemukan atau belum diterbitkan.</h2>");
 }
