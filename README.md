@@ -14,3 +14,12 @@ Secara konseptual, pembagian source code adalah sebagai berikut:
 
 Struktur folder `src/` disertakan sebagai representasi praktik
 pengorganisasian kode sesuai panduan pengembangan perangkat lunak.
+
+## Catatan Struktur
+
+Struktur folder pada repository ini disesuaikan dengan
+kebutuhan aplikasi PHP native tanpa framework.
+
+Beberapa file diletakkan pada root directory untuk menjaga
+kompatibilitas path dan kestabilan aplikasi.
+
