@@ -1,3 +1,0 @@
--- Database NOTULEN
--- File ini merupakan placeholder database aplikasi NOTULEN
--- Silakan import file SQL asli jika diperlukan
