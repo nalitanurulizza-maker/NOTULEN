@@ -16,18 +16,15 @@ if ($peserta_id == 0) {
 }
 
 $sql = "
-    SELECT n.*
-    FROM isi_notulen n
-    JOIN notulen_peserta np ON n.id = np.notulen_id
-    WHERE np.peserta_id = '$peserta_id'
-    AND (
-        n.judul LIKE '%$keyword%' 
-        OR n.isi LIKE '%$keyword%'
-    )
-    AND n.status = 'aktif'
-    ORDER BY n.tanggal DESC
+    SELECT *
+    FROM isi_notulen
+    WHERE status = 'aktif'
+      AND (
+        judul LIKE '%$keyword%'
+        OR isi LIKE '%$keyword%'
+      )
+    ORDER BY tanggal DESC
 ";
-
 
 $data = mysqli_query($koneksi, $sql);
 ?>
