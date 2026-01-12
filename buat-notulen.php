@@ -1,9 +1,13 @@
+<?php
+include 'koneksi.php';
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Buat / Edit Notulen</title>
+
   <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" />
 
   <style>
@@ -17,7 +21,7 @@
       display: flex;
       flex-direction: column;
     }
-    
+
     .sidebar h2 {
       font-size: 22px;
       font-weight: bold;
@@ -71,129 +75,144 @@
 
 <body>
 
-  <!-- ========== SIDEBAR ========= -->
-  <div class="sidebar">
-    <h2>📝 NOTUDEKS</h2>
+<!-- ========== SIDEBAR ========= -->
+<div class="sidebar">
+  <h2>📝 NOTUDEKS</h2>
 
-    <a href="dashboard_admin.php">📊 Dashboard</a>
-    <a href="buat-notulen.php" style="background-color: rgba(255,255,255,0.2);">📝 Buat Notulen</a>
-    <a href="tambah_peserta.php">👥 Tambah Peserta</a>
-    <a href="daftar-notulen.php">📁 Daftar Notulen</a>
-    <a href="arsip.php">📂 Arsip</a>
-    <a href="pengaturan.php">⚙️ Pengaturan</a>
+  <a href="dashboard_admin.php">📊 Dashboard</a>
+  <a href="buat-notulen.php" style="background-color: rgba(255,255,255,0.2);">
+    📝 Buat Notulen
+  </a>
+  <a href="tambah_peserta.php">👥 Tambah Peserta</a>
+  <a href="daftar-notulen.php">📁 Daftar Notulen</a>
+  <a href="arsip.php">📂 Arsip</a>
+  <a href="pengaturan.php">⚙️ Pengaturan</a>
 
-     <a class="logout-btn btn-danger" onclick="logout()">🚪 Keluar</a> 
-  </div>
+  <a class="logout-btn btn-danger" onclick="logout()">🚪 Keluar</a>
+</div>
 
-  <!-- ========== CONTENT AREA ========= -->
-  <div class="content">
-    <header>
-      <h1>📝 Buat / Edit Notulen</h1>
-    </header>
+<!-- ========== CONTENT ========= -->
+<div class="content">
 
-    <div class="form-card">
+  <header>
+    <h1>📝 Buat / Edit Notulen</h1>
+  </header>
 
-      <form id="notulenForm" method="POST" action="simpan-notulen.php" enctype="multipart/form-data">
+  <div class="form-card">
 
-        <div class="mb-3">
-          <label class="form-label">Judul Rapat</label>
-          <input type="text" class="form-control"
-            placeholder="Contoh: Rapat Koordinasi Minggu" name="judul">
+    <form
+      id="notulenForm"
+      method="POST"
+      action="simpan-notulen.php"
+      enctype="multipart/form-data"
+    >
+
+      <!-- Judul -->
+      <div class="mb-3">
+        <label class="form-label">Judul Rapat</label>
+        <input
+          type="text"
+          name="judul"
+          class="form-control"
+          placeholder="Contoh: Rapat Koordinasi Minggu"
+        >
+      </div>
+
+      <!-- Tanggal & Waktu -->
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Tanggal Rapat</label>
+          <input type="date" name="tanggal" class="form-control">
         </div>
 
-        <div class="row">
-          <div class="col-md-6 mb-3">
-            <label class="form-label">Tanggal Rapat</label>
-            <input type="date" class="form-control" name="tanggal">
-          </div>
-
-          <div class="col-md-6 mb-3">
-            <label class="form-label">Waktu Rapat</label>
-            <input type="time" class="form-control" name="waktu">
-          </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Waktu Rapat</label>
+          <input type="time" name="waktu" class="form-control">
         </div>
+      </div>
 
-        <div class="mb-3">
-          <label class="form-label">Isi Notulen</label>
-          <textarea rows="5" class="form-control" name="isi"
-            placeholder="Poin penting 1&#10;Poin penting 2&#10;Keputusan: ..."></textarea>
-        </div>
+      <!-- Isi -->
+      <div class="mb-3">
+        <label class="form-label">Isi Notulen</label>
+        <textarea
+          name="isi"
+          rows="5"
+          class="form-control"
+          placeholder="Poin penting 1&#10;Poin penting 2&#10;Keputusan: ..."
+        ></textarea>
+      </div>
 
-        <h3><i class="fas fa-user-graduate me-2"></i> Daftar Peserta</h3>
-        <hr/>
+      <!-- Peserta -->
+      <h3>👥 Daftar Peserta</h3>
+      <hr>
 
-        <table class="table table-striped table-bordered">
-          <thead>
+      <table class="table table-striped table-bordered">
+        <thead class="text-center">
+          <tr>
+            <th>NO</th>
+            <th>NAMA</th>
+            <th>EMAIL</th>
+            <th>AKSI</th>
+          </tr>
+        </thead>
+        <tbody>
+
+          <?php
+          $queryPeserta = mysqli_query($koneksi, "SELECT * FROM daftar_peserta");
+          $no = 1;
+          while ($peserta = mysqli_fetch_assoc($queryPeserta)) :
+          ?>
             <tr>
-              <th>NO</th>
-              <th>NAMA</th>
-              <th>EMAIL</th>
-              <th>AKSI</th>
+              <td class="text-center"><?= $no++; ?></td>
+              <td><?= htmlspecialchars($peserta['nama']); ?></td>
+              <td><?= htmlspecialchars($peserta['email']); ?></td>
+              <td class="text-center">
+                <a
+                  href="hapuspeserta-buat.php?id=<?= $peserta['id']; ?>"
+                  class="btn btn-danger btn-sm"
+                  onclick="return confirm('Yakin ingin menghapus peserta ini?')"
+                >
+                  🗑 Hapus
+                </a>
+              </td>
             </tr>
-          </thead>
-          <tbody>
-          
-            <?php
-            include 'koneksi.php';
-            $query = mysqli_query($koneksi, "SELECT * FROM daftar_peserta");
-            $no = 1;
-            while ($data = mysqli_fetch_assoc($query)) {
-            ?>
-              <tr>
-                <td><?= $no++; ?></td>
-                <td><?= htmlspecialchars($data['nama']); ?></td>
-                <td><?= htmlspecialchars($data['email']); ?></td>
-                <td class="text-center">
-                <a href="hapuspeserta-buat.php?id=<?= $data['id']; ?>"class="btn btn-danger btn-sm"onclick="return confirm('Yakin ingin menghapus peserta ini?')"> 🗑 Hapus</a>
-                </td>
-              </tr>
-            <?php } ?>
-              
-          </tbody>
-        </table>
+          <?php endwhile; ?>
 
-        <h4>Lampiran</h4>
-        <input type="file" class="form-control" id="lampiran" name="lampiran" >
-            </div>
+        </tbody>
+      </table>
 
-        <div class="d-flex gap-2">
-          <button type="submit" name="aksi" value="simpan" class="btn btn-primary">💾 Simpan</button>
-          <button type="submit" name="aksi" value="terbit" class="btn btn-success">📤 Terbitkan</button>
-          <button type="submit" name="aksi" value="arsip" class="btn btn-warning">🗂 Arsipkan</button>
-        </div>
+      <!-- Lampiran -->
+      <div class="mb-4">
+        <label class="form-label fw-semibold">Lampiran</label>
+        <input type="file" name="lampiran" class="form-control">
+      </div>
 
-      </form>
+      <!-- Tombol -->
+      <div class="d-flex gap-2">
+        <button type="submit" name="aksi" value="simpan" class="btn btn-primary">
+          💾 Simpan
+        </button>
+        <button type="submit" name="aksi" value="terbit" class="btn btn-success">
+          📤 Terbitkan
+        </button>
+        <button type="submit" name="aksi" value="arsip" class="btn btn-warning">
+          🗂 Arsipkan
+        </button>
+      </div>
 
-    </div>
-  </div>
+    </form>
 
-
-
-    </div>
   </div>
 </div>
 
-  <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="bootstrap/js/bootstrap.bundle.min.js"></script>
 
-  <script>
-    function logout() {
-      alert("Anda telah keluar dari dashboard admin.");
-      window.location.href = "menu home.php";
-    }
-  </script>
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      document.querySelectorAll('.edit-button').forEach(button => {
-        button.addEventListener('click', function () {
-          document.getElementById('edit-id').value = this.dataset.id;
-          document.getElementById('edit-nama').value = this.dataset.nama;
-          document.getElementById('edit-email').value = this.dataset.email;
-        });
-      });
-    });
-
-    
-  </script>
+<script>
+  function logout() {
+    alert("Anda telah keluar dari dashboard admin.");
+    window.location.href = "menu home.php";
+  }
+</script>
 
 </body>
 </html>

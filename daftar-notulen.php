@@ -1,22 +1,24 @@
 <?php
 include 'koneksi.php';
 
-// ===============================
-//   AMBIL NOTULEN AKTIF SAJA
-// ===============================
-$data = mysqli_query($koneksi,
+/* ===============================
+   AMBIL NOTULEN AKTIF
+================================ */
+$dataNotulen = mysqli_query(
+    $koneksi,
     "SELECT * FROM isi_notulen WHERE status='aktif' ORDER BY id DESC"
 );
 ?>
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Daftar Notulen Admin</title>
+
   <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
 
+  <!-- STYLE TIDAK DIUBAH -->
   <style>
     body {
       background-color: #f5f7fa;
@@ -67,18 +69,17 @@ $data = mysqli_query($koneksi,
     }
 
     /* MAIN CONTENT */
-    .main-content h1 {
-    font-size: 25px !important;
-    font-weight: 700;
-    }
-
-
     .main-content {
       margin-left: 260px;
       padding: 30px;
     }
 
-    /* TABEL NOTULEN */
+    .main-content h1 {
+      font-size: 25px !important;
+      font-weight: 700;
+    }
+
+    /* TABEL */
     .notulen-table {
       background: white;
       border-radius: 10px;
@@ -102,37 +103,38 @@ $data = mysqli_query($koneksi,
       font-weight: bold;
       font-size: 0.85rem;
     }
-    .status.aktif { background:#e6f7f1; color:#2a9d8f; }
-    .status.diarsipkan { background:#fdecea; color:#d62828; }
 
-  </style>
-
-
-</head>
-<body>
-<script>
-    function konfirmasiHapus(id) {
-      if (confirm("Yakin ingin menghapus notulen ini?")) {
-        window.location = "hapus-notulen.php?id=" + id;
-      }
+    .status.aktif {
+      background: #e6f7f1;
+      color: #2a9d8f;
     }
-  </script>
 
+    .status.diarsipkan {
+      background: #fdecea;
+      color: #d62828;
+    }
+  </style>
 </head>
+
 <body>
 
+<!-- ================= SIDEBAR ================= -->
 <div class="sidebar">
   <h2>📝 NOTUDEKS</h2>
 
   <a href="dashboard_admin.php">📊 Dashboard</a>
   <a href="buat-notulen.php">📝 Buat Notulen</a>
   <a href="tambah_peserta.php">👥 Tambah Peserta</a>
-  <a href="daftar-notulen.php" style="background:rgba(255,255,255,0.2);">📁 Daftar Notulen</a>
+  <a href="daftar-notulen.php" style="background: rgba(255,255,255,0.2);">
+    📁 Daftar Notulen
+  </a>
   <a href="arsip.php">📂 Arsip</a>
   <a href="pengaturan.php">⚙️ Pengaturan</a>
+
   <a class="logout-btn" onclick="logout()">🚪 Keluar</a>
 </div>
 
+<!-- ================= MAIN ================= -->
 <main class="main-content">
 
   <div class="d-flex justify-content-between align-items-center mb-4">
@@ -144,7 +146,11 @@ $data = mysqli_query($koneksi,
     </div>
   </div>
 
-  <input type="text" class="form-control mb-3" placeholder="Cari judul, tanggal, kata kunci">
+  <input
+    type="text"
+    class="form-control mb-3"
+    placeholder="Cari judul, tanggal, kata kunci"
+  >
 
   <table class="table notulen-table">
     <thead>
@@ -155,54 +161,58 @@ $data = mysqli_query($koneksi,
         <th>Aksi</th>
       </tr>
     </thead>
-
     <tbody>
-    <?php
-      
-      if (mysqli_num_rows($data) > 0) {
-        while ($row = mysqli_fetch_assoc($data)) {
-          $statusClass = ($row['status'] ?? 'aktif') == 'aktif' ? "aktif" : "diarsipkan";
-    ?>
 
-      <tr>
-        <td><?= htmlspecialchars($row['judul']); ?></td>
-        <td><?= $row['tanggal']; ?></td>
+      <?php if (mysqli_num_rows($dataNotulen) > 0): ?>
+        <?php while ($row = mysqli_fetch_assoc($dataNotulen)): 
+          $status = $row['status'] ?? 'aktif';
+        ?>
+          <tr>
+            <td><?= htmlspecialchars($row['judul']); ?></td>
+            <td><?= htmlspecialchars($row['tanggal']); ?></td>
+            <td>
+              <span class="status <?= $status ?>">
+                <?= ucfirst($status); ?>
+              </span>
+            </td>
+            <td>
+              <a href="detailnotulen.php?id=<?= $row['id']; ?>" class="btn btn-sm btn-primary">Lihat</a>
+              <a href="edit-notulen.php?id=<?= $row['id']; ?>" class="btn btn-sm btn-warning">Edit</a>
+              <button
+                onclick="konfirmasiHapus(<?= $row['id']; ?>)"
+                class="btn btn-sm btn-danger">
+                Hapus
+              </button>
+            </td>
+          </tr>
+        <?php endwhile; ?>
+      <?php else: ?>
+        <tr>
+          <td colspan="4" class="text-center py-4 text-muted">
+            Belum ada notulen.
+          </td>
+        </tr>
+      <?php endif; ?>
 
-        <td>
-          <span class="status <?= $statusClass ?>">
-            <?= ucfirst($statusClass); ?>
-          </span>
-        </td>
-
-        <td>
-          <a href="detailnotulen.php?id=<?= $row['id']; ?>" class="btn btn-sm btn-primary">Lihat</a>
-          <a href="edit-notulen.php?id=<?= $row['id']; ?>" class="btn btn-sm btn-warning">Edit</a>
-          <button onclick="konfirmasiHapus(<?= $row['id']; ?>)" class="btn btn-sm btn-danger">
-            Hapus
-          </button>
-        </td>
-      </tr>
-
-    <?php
-        }
-      } else {
-    ?>
-      <tr>
-        <td colspan="4" class="text-center py-4 text-muted">Belum ada notulen.</td>
-      </tr>
-    <?php } ?>
     </tbody>
   </table>
 
 </main>
 
- <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="bootstrap/js/bootstrap.bundle.min.js"></script>
 
-  <script>
-    function logout() {
-      alert("Anda telah keluar dari dashboard admin.");
-      window.location.href = "menu home.php";
+<script>
+  function konfirmasiHapus(id) {
+    if (confirm("Yakin ingin menghapus notulen ini?")) {
+      window.location.href = "hapus-notulen.php?id=" + id;
     }
-  </script>
+  }
+
+  function logout() {
+    alert("Anda telah keluar dari dashboard admin.");
+    window.location.href = "menu home.php";
+  }
+</script>
+
 </body>
 </html>

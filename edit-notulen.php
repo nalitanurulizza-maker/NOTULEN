@@ -1,68 +1,86 @@
 <?php
 include 'koneksi.php';
 
+/* ===============================
+   VALIDASI ID
+================================ */
 if (!isset($_GET['id'])) {
     die("ID tidak ditemukan.");
 }
 
-$id = $_GET['id'];
-$result = mysqli_query($koneksi, "SELECT * FROM isi_notulen WHERE id='$id'");
-$row = mysqli_fetch_assoc($result);
+$id = mysqli_real_escape_string($koneksi, $_GET['id']);
 
-if (!$row) {
+/* ===============================
+   AMBIL DATA NOTULEN
+================================ */
+$queryNotulen = mysqli_query(
+    $koneksi,
+    "SELECT * FROM isi_notulen WHERE id='$id'"
+);
+
+$notulen = mysqli_fetch_assoc($queryNotulen);
+
+if (!$notulen) {
     die("Data tidak ditemukan.");
 }
 
-// === UPDATE DATA ===
+/* ===============================
+   PROSES UPDATE
+================================ */
 if (isset($_POST['update'])) {
-    
 
-    $judul   = $_POST['judul'];
-    $tanggal = $_POST['tanggal'];
-    $waktu   = $_POST['waktu'];
-    $status  = $_POST['status'];
-    $isi     = $_POST['isi'];
+    $judul   = mysqli_real_escape_string($koneksi, $_POST['judul']);
+    $tanggal = mysqli_real_escape_string($koneksi, $_POST['tanggal']);
+    $waktu   = mysqli_real_escape_string($koneksi, $_POST['waktu']);
+    $status  = mysqli_real_escape_string($koneksi, $_POST['status']);
+    $isi     = mysqli_real_escape_string($koneksi, $_POST['isi']);
 
-    // --- PROSES LAMPIRAN ---
-    $lampiranBaru = $row['lampiran']; // default pakai yg lama
+    /* ===== LAMPIRAN ===== */
+    $lampiranBaru = $notulen['lampiran']; // default pakai lampiran lama
 
     if (!empty($_FILES['lampiran']['name'])) {
 
-        // hapus file lama jika ada
-        if (!empty($row['lampiran']) && file_exists("lampiran/" . $row['lampiran'])) {
-            unlink("lampiran/" . $row['lampiran']);
+        // Hapus lampiran lama jika ada
+        if (
+            !empty($notulen['lampiran']) &&
+            file_exists("uploads/" . $notulen['lampiran'])
+        ) {
+            unlink("uploads/" . $notulen['lampiran']);
         }
 
         $namaFile = time() . "_" . basename($_FILES['lampiran']['name']);
-        $upload = move_uploaded_file($_FILES['lampiran']['tmp_name'], "lampiran/" . $namaFile);
+        $pathUpload = "uploads/" . $namaFile;
 
-        if ($upload) {
+        if (move_uploaded_file($_FILES['lampiran']['tmp_name'], $pathUpload)) {
             $lampiranBaru = $namaFile;
         }
     }
 
-    // UPDATE ke database
-    mysqli_query($koneksi, "
-        UPDATE isi_notulen SET 
+    /* ===== UPDATE DATABASE ===== */
+    mysqli_query(
+        $koneksi,
+        "UPDATE isi_notulen SET
             judul='$judul',
             tanggal='$tanggal',
             waktu='$waktu',
             status='$status',
             isi='$isi',
             lampiran='$lampiranBaru'
-        WHERE id='$id'
-    ");
+         WHERE id='$id'"
+    );
 
     header("Location: daftar-notulen.php");
     exit;
 }
 ?>
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
+    <meta charset="UTF-8">
     <title>Edit Notulen</title>
     <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
 </head>
+
 <body class="p-4">
 
 <h2>Edit Notulen</h2>
@@ -70,44 +88,77 @@ if (isset($_POST['update'])) {
 
 <form method="POST" enctype="multipart/form-data">
 
+    <!-- Judul -->
     <div class="mb-3">
         <label class="form-label">Judul</label>
-        <input type="text" name="judul" class="form-control"
-               value="<?= htmlspecialchars($row['judul']); ?>" required>
+        <input
+            type="text"
+            name="judul"
+            class="form-control"
+            value="<?= htmlspecialchars($notulen['judul']); ?>"
+            required
+        >
     </div>
 
+    <!-- Tanggal -->
     <div class="mb-3">
         <label class="form-label">Tanggal</label>
-        <input type="date" name="tanggal" class="form-control"
-               value="<?= $row['tanggal']; ?>" required>
+        <input
+            type="date"
+            name="tanggal"
+            class="form-control"
+            value="<?= htmlspecialchars($notulen['tanggal']); ?>"
+            required
+        >
     </div>
 
+    <!-- Waktu -->
     <div class="mb-3">
         <label class="form-label">Waktu</label>
-        <input type="time" name="waktu" class="form-control"
-               value="<?= $row['waktu']; ?>">
+        <input
+            type="time"
+            name="waktu"
+            class="form-control"
+            value="<?= htmlspecialchars($notulen['waktu']); ?>"
+        >
     </div>
 
+    <!-- Status -->
     <div class="mb-3">
         <label class="form-label">Status</label>
         <select name="status" class="form-control">
-            <option value="aktif" <?= $row['status']=="aktif" ? "selected" : ""; ?>>Aktif</option>
-            <option value="diarsipkan" <?= $row['status']=="diarsipkan" ? "selected" : ""; ?>>Diarsipkan</option>
+            <option value="aktif" <?= $notulen['status'] === 'aktif' ? 'selected' : ''; ?>>
+                Aktif
+            </option>
+            <option value="diarsipkan" <?= $notulen['status'] === 'diarsipkan' ? 'selected' : ''; ?>>
+                Diarsipkan
+            </option>
         </select>
     </div>
 
+    <!-- Isi -->
     <div class="mb-3">
         <label class="form-label">Isi Rapat</label>
-        <textarea name="isi" class="form-control" rows="6" required><?= htmlspecialchars($row['isi']); ?></textarea>
+        <textarea
+            name="isi"
+            rows="6"
+            class="form-control"
+            required
+        ><?= htmlspecialchars($notulen['isi']); ?></textarea>
     </div>
 
+    <!-- Lampiran -->
     <div class="mb-3">
         <label class="form-label">Lampiran</label><br>
 
-        <?php if (!empty($row['lampiran'])): ?>
-            <p>Lampiran saat ini: 
-                <a href="lampiran/<?= $row['lampiran']; ?>" target="_blank">
-                    <?= $row['lampiran']; ?>
+        <?php if (!empty($notulen['lampiran'])): ?>
+            <p>
+                Lampiran saat ini:
+                <a
+                    href="uploads/<?= htmlspecialchars($notulen['lampiran']); ?>"
+                    target="_blank"
+                >
+                    <?= htmlspecialchars($notulen['lampiran']); ?>
                 </a>
             </p>
         <?php else: ?>
@@ -115,11 +166,18 @@ if (isset($_POST['update'])) {
         <?php endif; ?>
 
         <input type="file" name="lampiran" class="form-control">
-        <small class="text-muted">Kosongkan jika tidak ingin mengganti lampiran.</small>
+        <small class="text-muted">
+            Kosongkan jika tidak ingin mengganti lampiran.
+        </small>
     </div>
 
-    <button type="submit" name="update" class="btn btn-primary">Simpan Perubahan</button>
-    <a href="daftar-notulen.php" class="btn btn-secondary">Kembali</a>
+    <!-- Tombol -->
+    <button type="submit" name="update" class="btn btn-primary">
+        Simpan Perubahan
+    </button>
+    <a href="daftar-notulen.php" class="btn btn-secondary">
+        Kembali
+    </a>
 
 </form>
 
