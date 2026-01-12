@@ -1,36 +1,49 @@
 <?php
 session_start();
+
+/* ================= KONEKSI ================= */
 $koneksi = mysqli_connect("localhost", "root", "", "notulen");
+if (!$koneksi) {
+    die("Koneksi database gagal");
+}
 
-$data = mysqli_query($koneksi, "SELECT * FROM pengaturan WHERE id=1");
-$set  = mysqli_fetch_assoc($data);
+/* ================= AMBIL DATA PENGATURAN ================= */
+$queryPengaturan = mysqli_query(
+    $koneksi,
+    "SELECT email_admin FROM pengaturan WHERE id = 1"
+);
+$pengaturan = mysqli_fetch_assoc($queryPengaturan);
 
-// PROSES SIMPAN
+/* ================= PROSES SIMPAN ================= */
 if (isset($_POST['simpan'])) {
 
-    $email = mysqli_real_escape_string($koneksi, $_POST['email']);
-    $pass  = $_POST['password'];
+    $email    = mysqli_real_escape_string($koneksi, $_POST['email']);
+    $password = $_POST['password'];
 
-    if ($pass != "") {
-        $pass = password_hash($pass, PASSWORD_DEFAULT);
+    if (!empty($password)) {
+        $passwordHash = password_hash($password, PASSWORD_DEFAULT);
 
-        $sql = "UPDATE pengaturan SET 
-                email_admin='$email',
-                password_admin='$pass'
-                WHERE id=1";
+        $sqlUpdate = "
+            UPDATE pengaturan 
+            SET email_admin = '$email',
+                password_admin = '$passwordHash'
+            WHERE id = 1
+        ";
     } else {
-        $sql = "UPDATE pengaturan SET 
-                email_admin='$email'
-                WHERE id=1";
+        $sqlUpdate = "
+            UPDATE pengaturan 
+            SET email_admin = '$email'
+            WHERE id = 1
+        ";
     }
 
-    mysqli_query($conn, $sql);
+    mysqli_query($koneksi, $sqlUpdate);
+
     $_SESSION['notif'] = "Pengaturan berhasil diperbarui!";
     header("Location: pengaturan.php");
     exit;
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -39,6 +52,7 @@ if (isset($_POST['simpan'])) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
 
+  <!-- STYLE TIDAK DIUBAH -->
   <style>
     body {
       background-color: #f6f8fc;
@@ -47,7 +61,6 @@ if (isset($_POST['simpan'])) {
       font-family: "Segoe UI", sans-serif;
     }
 
-    /* Sidebar */
     .sidebar {
       width: 250px;
       height: 100vh;
@@ -58,6 +71,7 @@ if (isset($_POST['simpan'])) {
       display: flex;
       flex-direction: column;
     }
+
     .sidebar h2 {
       font-size: 22px;
       font-weight: bold;
@@ -90,14 +104,12 @@ if (isset($_POST['simpan'])) {
       font-weight: bold;
     }
 
-    /* Main */
     .main-content {
       margin-left: 260px;
       padding: 40px;
       width: 100%;
     }
 
-    /* Card hover */
     .card-custom {
       transition: 0.2s;
     }
@@ -119,22 +131,25 @@ if (isset($_POST['simpan'])) {
 
 <!-- SIDEBAR -->
 <div class="sidebar">
-    <h2>📝 NOTUDEKS</h2>
+  <h2>📝 NOTUDEKS</h2>
 
-    <a href="dashboard_admin.php">📊 Dashboard</a>
-    <a href="buat-notulen.php">📝 Buat Notulen</a>
-    <a href="tambah_peserta.php">👥 Tambah Peserta</a>
-    <a href="daftar-notulen.php">📁 Daftar Notulen</a>
-    <a href="arsip.php">📂 Arsip</a>
-    <a href="pengaturan.php" class="active">⚙️ Pengaturan</a>
+  <a href="dashboard_admin.php">📊 Dashboard</a>
+  <a href="buat-notulen.php">📝 Buat Notulen</a>
+  <a href="tambah_peserta.php">👥 Tambah Peserta</a>
+  <a href="daftar-notulen.php">📁 Daftar Notulen</a>
+  <a href="arsip.php">📂 Arsip</a>
+  <a href="pengaturan.php" class="active">⚙️ Pengaturan</a>
 
-   <a class="logout-btn" onclick="logout()">🚪 Keluar</a>
+  <a class="logout-btn" onclick="logout()">🚪 Keluar</a>
 </div>
+
 <!-- MAIN CONTENT -->
 <main class="main-content">
 
   <h1 class="fw-bold mb-2">Pengaturan Admin ⚙️</h1>
-  <p class="text-secondary mb-4">Kelola email dan keamanan akun admin Anda.</p>
+  <p class="text-secondary mb-4">
+    Kelola email dan keamanan akun admin Anda.
+  </p>
 
   <div class="row justify-content-center">
     <div class="col-md-6">
@@ -146,15 +161,30 @@ if (isset($_POST['simpan'])) {
 
           <div class="mb-3">
             <label class="form-label fw-semibold">Email Admin</label>
-            <input type="email" name="email" value="<?= $set['email_admin']; ?>" class="form-control" required>
+            <input
+              type="email"
+              name="email"
+              value="<?= $pengaturan['email_admin']; ?>"
+              class="form-control"
+              required
+            >
           </div>
 
           <div class="mb-4">
             <label class="form-label fw-semibold">Password Baru</label>
-            <input type="password" name="password" class="form-control" placeholder="Kosongkan jika tidak diubah">
+            <input
+              type="password"
+              name="password"
+              class="form-control"
+              placeholder="Kosongkan jika tidak diubah"
+            >
           </div>
 
-          <button type="submit" name="simpan" class="btn btn-simpan w-100 py-2">
+          <button
+            type="submit"
+            name="simpan"
+            class="btn btn-simpan w-100 py-2"
+          >
             💾 Simpan Perubahan
           </button>
 
@@ -167,13 +197,12 @@ if (isset($_POST['simpan'])) {
 </main>
 
 <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
-
-  <script>
-    function logout() {
-      alert("Anda telah keluar dari dashboard admin.");
-      window.location.href = "menu home.php";
-    }
-  </script>
+<script>
+  function logout() {
+    alert("Anda telah keluar dari dashboard admin.");
+    window.location.href = "menu home.php";
+  }
+</script>
 
 </body>
 </html>

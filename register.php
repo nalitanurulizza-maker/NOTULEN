@@ -1,41 +1,70 @@
 <?php
-include 'koneksi.php';
+require_once 'koneksi.php';
 
 $success = "";
-$error = "";
+$error   = "";
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+/* ================= REGISTER PROCESS ================= */
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
-    $username = mysqli_real_escape_string($koneksi, $_POST['username']);
-    $email    = mysqli_real_escape_string($koneksi, $_POST['email']);
-    $no_hp    = mysqli_real_escape_string($koneksi, $_POST['no_hp']);
-    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
-    $role     = mysqli_real_escape_string($koneksi, $_POST['role']);
+    $username = trim($_POST['username'] ?? '');
+    $email    = trim($_POST['email'] ?? '');
+    $no_hp    = trim($_POST['no_hp'] ?? '');
+    $password = $_POST['password'] ?? '';
+    $role     = $_POST['role'] ?? '';
 
-    // Cek username
-    $check = mysqli_query($koneksi, "SELECT id FROM user WHERE username='$username'");
-    if (mysqli_num_rows($check) > 0) {
-        $error = "Username sudah digunakan!";
+    if ($username === '' || $email === '' || $no_hp === '' || $password === '' || $role === '') {
+        $error = "Semua field wajib diisi!";
     } else {
-        $query = mysqli_query($koneksi, "
-            INSERT INTO user (username, email, no_hp, password, role)
-            VALUES ('$username', '$email', '$no_hp', '$password', '$role')
-        ");
 
-        if ($query) {
-            $success = "Pendaftaran berhasil! Silakan login.";
-            header("refresh:2; url=menu home.php");
+        // Cek username
+        $checkStmt = $koneksi->prepare(
+            "SELECT id FROM user WHERE username = ? LIMIT 1"
+        );
+        $checkStmt->bind_param("s", $username);
+        $checkStmt->execute();
+        $checkStmt->store_result();
+
+        if ($checkStmt->num_rows > 0) {
+            $error = "Username sudah digunakan!";
         } else {
-            $error = "Gagal mendaftar!";
+
+            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+
+            $insertStmt = $koneksi->prepare(
+                "INSERT INTO user (username, email, no_hp, password, role)
+                 VALUES (?, ?, ?, ?, ?)"
+            );
+            $insertStmt->bind_param(
+                "sssss",
+                $username,
+                $email,
+                $no_hp,
+                $hashedPassword,
+                $role
+            );
+
+            if ($insertStmt->execute()) {
+                $success = "Pendaftaran berhasil! Silakan login.";
+                header("refresh:2; url=menu home.php");
+            } else {
+                $error = "Gagal mendaftar!";
+            }
+
+            $insertStmt->close();
         }
+
+        $checkStmt->close();
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
 <meta charset="UTF-8">
 <title>Register</title>
+
 <style>
 *{box-sizing:border-box}
 body{
@@ -100,17 +129,22 @@ button:hover{
 }
 </style>
 </head>
+
 <body>
 
 <div class="register-box">
 <h2>Register</h2>
 
 <?php if ($error): ?>
-<div class="alert error"><?= $error ?></div>
+<div class="alert error">
+    <?= htmlspecialchars($error); ?>
+</div>
 <?php endif; ?>
 
 <?php if ($success): ?>
-<div class="alert success"><?= $success ?></div>
+<div class="alert success">
+    <?= htmlspecialchars($success); ?>
+</div>
 <?php endif; ?>
 
 <form method="POST">
