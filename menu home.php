@@ -1,71 +1,58 @@
 <?php
 session_start();
-require_once 'koneksi.php';
+include 'koneksi.php';
 
 $error = null;
 
-/* ================= LOGIN PROCESS ================= */
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $user = mysqli_real_escape_string($koneksi, $_POST['user']);
+    $pass = $_POST['pass'];
 
-    $username = trim($_POST['user'] ?? '');
-    $password = $_POST['pass'] ?? '';
+    $query = mysqli_query($koneksi, "SELECT * FROM user WHERE username='$user' LIMIT 1");
 
-    if ($username === '' || $password === '') {
-        $error = "Username dan password wajib diisi!";
-    } else {
+    if ($row = mysqli_fetch_assoc($query)) {
 
-        $stmt = $koneksi->prepare(
-            "SELECT id, username, password, role 
-             FROM user 
-             WHERE username = ? 
-             LIMIT 1"
-        );
-        $stmt->bind_param("s", $username);
-        $stmt->execute();
+        if (password_verify($pass, $row['password'])) {
 
-        $result = $stmt->get_result();
-        $user   = $result->fetch_assoc();
+            // ================= SESSION =================
+            $_SESSION['login']      = true; 
+            $_SESSION['username']   = $row['username']; 
+            $_SESSION['user_id']    = $row['id'];
+            $_SESSION['role']       = $row['role'];
 
-        if (!$user) {
-            $error = "Username tidak ditemukan!";
-        } elseif (!password_verify($password, $user['password'])) {
-            $error = "Password salah!";
-        } else {
-
-            $_SESSION['login']    = true;
-            $_SESSION['user_id']  = $user['id'];
-            $_SESSION['username'] = $user['username'];
-            $_SESSION['role']     = $user['role'];
-
-            if ($user['role'] === 'admin') {
+            if ($row['role'] === 'admin') {
                 $_SESSION['notif'] = "Selamat datang Admin!";
                 header("Location: dashboard_admin.php");
-                exit;
-            }
-
-            if ($user['role'] === 'peserta') {
+                exit();
+            } elseif ($row['role'] === 'peserta') {
+                $_SESSION['peserta_id'] = $row['id'];
                 $_SESSION['notif'] = "Login berhasil, selamat datang!";
                 header("Location: dashboardpeserta.php");
-                exit;
+                exit();
+            } else {
+                $error = "Role tidak dikenali!";
             }
 
-            $error = "Role tidak dikenali!";
+        } else {
+            $error = "Password salah!";
         }
 
-        $stmt->close();
+    } else {
+        $error = "Username tidak ditemukan!";
     }
 }
 ?>
 
+
 <!DOCTYPE html>
 <html lang="id">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Notulen Rapat | Kirim</title>
 
-<link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notulen Rapat | Kirim</title>
+  <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
@@ -306,18 +293,18 @@ footer{
 
 <body>
 
-<!-- ================= HEADER ================= -->
-<header>
-  <h1>Notudesk</h1>
-  <nav>
-    <a href="#hero">Beranda</a>
-    <a href="#tentang">Tentang</a>
-    <a href="#kontak">Kontak</a>
-  </nav>
-</header>
+  <!-- HEADER -->
+  <header>
+    <h1>Notudesk</h1>
+    <nav>
+      <a href="#hero">Beranda</a>
+      <a href="#tentang">Tentang</a>
+      <a href="#kontak">Kontak</a>
+    </nav>
+  </header>
 
-<!-- ================= HERO ================= -->
-<section id="hero" class="hero">
+  <!-- HERO -->
+  <section id="hero" class="hero">
   <h2>
     Catatan Rapat <span>Berkualitas</span><br>
     & Instan 
@@ -330,109 +317,149 @@ footer{
   </button>
 </section>
 
-<!-- ================= MODAL LOGIN ================= -->
-<div class="modal fade" id="loginModal" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
 
-      <div class="modal-header bg-primary text-white">
-        <h5 class="modal-title">Form Login</h5>
+  <!-- MODAL LOGIN -->
+  <div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content shadow">
+
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title">Form Login</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-      </div>
+        </div>
+        <div class="modal-body">
+          <?php if (isset($error)) : ?>
+                    <div class="alert alert-danger text-center">
+                        <?php echo $error; ?>
+                    </div>
+                <?php endif; ?>
+       <form  method="POST">
+            <div class="text-center mb-4">
+              <h3 class="fw-bold">Notudeks</h3>
+            </div>
 
-      <div class="modal-body">
-
-        <?php if ($error): ?>
-          <div class="alert alert-danger text-center alert-login">
-            <?= htmlspecialchars($error); ?>
-          </div>
-        <?php endif; ?>
-
-        <form method="POST">
-          <div class="mb-3">
-            <label class="form-label">Username</label>
-            <input type="text" name="user" class="form-control" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Password</label>
-            <input type="password" name="pass" class="form-control" required>
-          </div>
-          <button class="btn btn-primary w-100">Login</button>
-        </form>
-
-        <p class="text-center mt-3">
-          belum punya akun? <a href="register.php">register di sini</a>
-        </p>
+            <div class="mb-3">
+                <label for="user" class="form-label">Username</label>
+                <input type="text" class="form-control" id="user" name="user" required>
+            </div>
+            <div class="mb-3">
+                <label for="pass" class="form-label">Password</label>
+                <input type="password" class="form-control" id="pass" name="pass" required>
+            </div>
+             <button type="submit" class="btn btn-primary w-100">Login</button>
+          </form>
+          <p class="text-center mt-3">
+                        belum punya akun? <a href="register.php">register di sini</a>
+                    </p>
+        </div>
 
       </div>
     </div>
   </div>
-</div>
 
-<!-- ================= TENTANG ================= -->
-<section id="tentang">
-  <div class="container">
-    <h2 class="fw-bold text-center mb-4">Tentang Notudeks</h2>
+  <!-- SECTION TENTANG -->
+  <section id="tentang">
+    <div class="container">
+      <h2 class="fw-bold text-center mb-4">Tentang Notudeks</h2>
 
-    <p class="text-center mb-4">
-      Notudeks adalah platform digital untuk membantu Anda membuat, menyimpan,
-      dan mengelola notulen rapat dengan lebih mudah dan terstruktur.
-    </p>
+      <p class="text-center mb-4">
+        Notudeks adalah platform digital untuk membantu Anda membuat, menyimpan, dan mengelola notulen rapat
+        dengan lebih mudah dan terstruktur.
+      </p>
 
-    <div class="row g-4 mt-4">
-      <div class="col-md-4">
-        <div class="card-animate">
-          <h5>📄 Pencatatan Cepat</h5>
-          <p>Mencatat poin rapat dengan mudah dan rapi.</p>
+      <div class="row g-4 mt-4">
+        <div class="col-md-4">
+          <div class="card-animate">
+            <h5 class="fw-bold">📄 Pencatatan Cepat</h5>
+            <p>Mencatat poin rapat dengan mudah menggunakan tampilan sederhana & rapi.</p>
+          </div>
         </div>
-      </div>
 
-      <div class="col-md-4">
-        <div class="card-animate">
-          <h5>☁ Penyimpanan Aman</h5>
-          <p>Data notulen tersimpan aman dan dapat diakses kapan saja.</p>
+        <div class="col-md-4">
+          <div class="p-3 shadow-sm bg-white rounded-3 card-animate card-hover">
+            <h5 class="fw-bold">☁ Penyimpanan Aman</h5>
+            <p>Semua notulen tersimpan aman dan dapat diakses kapan saja.</p>
+          </div>
         </div>
-      </div>
 
-      <div class="col-md-4">
-        <div class="card-animate">
-          <h5>🔗 Berbagi Mudah</h5>
-          <p>Bagikan notulen rapat ke anggota tim secara instan.</p>
+        <div class="col-md-4">
+          <div class="p-3 shadow-sm bg-white rounded-3 card-animate card-hover">
+            <h5 class="fw-bold">🔗 Berbagi Mudah</h5>
+            <p>Bagikan notulen rapat ke anggota tim secara instan.</p>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-</section>
+    
+  </section>
 
-<!-- ================= KONTAK ================= -->
-<section id="kontak">
-  <div class="container text-center">
-    <h2 class="fw-bold mb-3">Kontak Kami</h2>
-    <p class="text-secondary mb-4">Hubungi kami melalui kontak berikut.</p>
+  <!-- KONTAK -->
+  <section id="kontak">
+    <div class="container text-center">
+      <h2 class="fw-bold mb-3">Kontak Kami</h2>
 
-    <div class="d-flex flex-column align-items-center gap-3">
-      <div class="p-3 bg-white rounded-3 shadow-sm d-flex align-items-center gap-2">
-        <i class="fas fa-phone text-primary fs-4"></i>
-        <span>0812-3456-7890</span>
+      <p class="text-secondary mb-4">Hubungi kami melalui kontak atau media sosial berikut.</p>
+
+      <div class="d-flex flex-column align-items-center gap-3">
+
+        <div class="p-3 rounded-3 bg-white shadow-sm d-flex align-items-center gap-2">
+          <i class="fas fa-phone text-primary fs-4"></i>
+          <span class="fw-semibold">0812-3456-7890</span>
+        </div>
+
+        <div class="p-3 rounded-3 bg-white shadow-sm d-flex align-items-center gap-2">
+          <i class="fas fa-envelope text-primary fs-4"></i>
+          <span class="fw-semibold">support@notudeks.com</span>
+        </div>
+
+       <div class="d-flex justify-content-center gap-3 fs-4">
+        <a href="#" style="color:#1877f2;"><i class="fa-brands fa-facebook social-icon"></i></a>   
+        <a href="#" style="color:#e4405f;"><i class="fa-brands fa-instagram social-icon"></i></a>  
+        <a href="#" style="color:#1da1f2;"><i class="fa-brands fa-twitter social-icon"></i></a>    
       </div>
 
-      <div class="p-3 bg-white rounded-3 shadow-sm d-flex align-items-center gap-2">
-        <i class="fas fa-envelope text-primary fs-4"></i>
-        <span>support@notudeks.com</span>
+
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<footer>© 2025 NOTUDEKS — Semua Hak Dilindungi</footer>
+  <footer>© 2025 NOTUDEKS — Semua Hak Dilindungi</footer>
 
-<script src="bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
 
-<?php if ($error): ?>
+  <!-- ANIMASI JAVASCRIPT -->
+  <script>
+    const fadeElements = document.querySelectorAll('.fade-in');
+    const cards = document.querySelectorAll('.card-animate');
+
+    function checkScroll() {
+      fadeElements.forEach(el => {
+        if (el.getBoundingClientRect().top < window.innerHeight - 80) {
+          el.classList.add('show');
+        }
+      });
+
+      cards.forEach(card => {
+        if (card.getBoundingClientRect().top < window.innerHeight - 80) {
+          card.classList.add('show');
+        }
+      });
+    }
+
+    window.addEventListener('scroll', checkScroll);
+    window.addEventListener('load', checkScroll);
+  </script>
+
+<?php if (isset($error)) : ?>
 <script>
-  new bootstrap.Modal(document.getElementById('loginModal')).show();
+  var loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
+  loginModal.show();
 </script>
 <?php endif; ?>
 
+
 </body>
+
 </html>
