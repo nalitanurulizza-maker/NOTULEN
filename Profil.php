@@ -2,24 +2,64 @@
 session_start();
 include 'koneksi.php';
 
-// Cek login
+/* =====================
+   CEK LOGIN
+===================== */
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit;
 }
 
-// Ambil data user
-$id = $_SESSION['user_id'];
-$query = mysqli_query($koneksi, "SELECT * FROM user WHERE id='$id'");
-$user = mysqli_fetch_assoc($query);
+$user_id = $_SESSION['user_id'];
 
-// Validasi data
+/* =====================
+   DATA USER
+===================== */
+$qUser = mysqli_query($koneksi, "SELECT * FROM user WHERE id='$user_id'");
+$user = mysqli_fetch_assoc($qUser);
+
 if (!$user) {
-    die("Data user tidak ditemukan!");
+    die("User tidak ditemukan");
 }
 
-// Inisial username
 $inisial = strtoupper(substr($user['username'], 0, 1));
+
+/* =====================
+   TOTAL NOTULEN DIIKUTI
+   tabel: notulen_peserta
+===================== */
+$qTotalNotulen = mysqli_query($koneksi, "
+    SELECT COUNT(DISTINCT notulen_id) AS total
+    FROM favorite
+    WHERE user_id = '$user_id'
+");
+$totalNotulen = mysqli_fetch_assoc($qTotalNotulen)['total'];
+
+/* =====================
+   TOTAL UNDUHAN
+   tabel: aktivitas
+===================== */
+$qUnduhan = mysqli_query($koneksi, "
+    SELECT COUNT(*) AS total
+    FROM aktivitas_peserta
+    WHERE user_id = '$user_id'
+    AND jenis = 'unduhan'
+");
+$totalUnduhan = mysqli_fetch_assoc($qUnduhan)['total'];
+
+/* =====================
+   AKTIVITAS TERBARU
+   tabel: aktivitas
+   kolom: kegiatan, tanggal
+===================== */
+$qAktivitas = mysqli_query($koneksi, "
+    SELECT keterangan, created_at
+    FROM aktivitas_peserta
+    WHERE user_id = '$user_id'
+    ORDER BY created_at DESC
+    LIMIT 1
+");
+$aktivitas = mysqli_fetch_assoc($qAktivitas);
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -84,49 +124,46 @@ $inisial = strtoupper(substr($user['username'], 0, 1));
       </div>
     </aside>
 
-    <!-- KANAN -->
-    <section class="profile-right">
+    <!-- PROFIL KANAN -->
+<section class="profile-right">
 
-      <div class="card stat-row">
-        <div class="stat-item">
-          <small>Total Notulen Dibintangi</small>
-          <h1>0</h1>
-        </div>
-        <div class="stat-item">
-          <small>Unduhan Bulan Ini</small>
-          <h1>0</h1>
-        </div>
-      </div>
+  <!-- STAT -->
+  <div class="card stat-row">
+    <div class="stat-item">
+      <small>Total Notulen Favorit</small>
+      <h1><?= $totalNotulen ?></h1>
+    </div>
+    <div class="stat-item">
+      <small>Total Unduhan</small>
+<h1><?= $totalUnduhan ?></h1>
 
-      <div class="card">
-        <h3>Aktivitas Terbaru</h3>
-        <ul class="activity-list">
-          <li>
-            <div>
-              <strong>Pemilihan Ketua OSIS</strong>
-              <p class="muted-sm">10 Des 2025 • 14:22</p>
-            </div>
-            <span class="chip">Tim</span>
-          </li>
-        </ul>
-      </div>
-
-      <div class="card">
-        <h3>Akses Cepat</h3>
-        <div class="quick-actions">
-          <button class="btn secondary full">Kelola perangkat terhubung</button>
-          <button class="btn secondary full" onclick="logout()">Keluar dari sesi</button>
-        </div>
-      </div>
-
-    </section>
-
+    </div>
   </div>
-</main>
 
-<footer class="footer-note">
-  <span>© 2025 Notudeks</span>
-</footer>
+  <!-- AKTIVITAS -->
+  <div class="card">
+    <h3>Aktivitas Terbaru</h3>
+    <ul class="activity-list">
+      <?php if ($aktivitas): ?>
+        <li>
+          <div>
+            <p class="muted-sm">
+              <?= htmlspecialchars($aktivitas['keterangan']) ?>
+              <?= date('d M Y • H:i', strtotime($aktivitas['created_at'])) ?>
+            </p>
+          </div>
+          <span class="chip">Tim</span>
+        </li>
+      <?php else: ?>
+        <li class="muted-sm">Belum ada aktivitas</li>
+      <?php endif; ?>
+    </ul>
+  </div>
+
+</section>
+</div>
+</main>
+</div>
 
 <script>
 function logout() {

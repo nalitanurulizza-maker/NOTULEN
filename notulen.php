@@ -72,12 +72,13 @@ $data = mysqli_query($koneksi,
     </button>
   </form>
 
-  <?php if (!empty($row['lampiran'])) { ?>
-    <a href="upload/<?= $row['lampiran']; ?>" 
-       class="icon-btn btn-download" download>
-       ⬇️
-    </a>
-  <?php } ?>
+ <?php if (!empty($row['lampiran'])) { ?>
+  <a href="download.php?file=<?= urlencode($row['lampiran']); ?>" 
+     class="icon-btn btn-download">
+     ⬇️
+  </a>
+<?php } ?>
+
 
 </div>
 

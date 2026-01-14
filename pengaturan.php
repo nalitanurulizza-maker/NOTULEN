@@ -170,16 +170,6 @@ if (isset($_POST['simpan'])) {
             >
           </div>
 
-          <div class="mb-4">
-            <label class="form-label fw-semibold">Password Baru</label>
-            <input
-              type="password"
-              name="password"
-              class="form-control"
-              placeholder="Kosongkan jika tidak diubah"
-            >
-          </div>
-
           <button
             type="submit"
             name="simpan"

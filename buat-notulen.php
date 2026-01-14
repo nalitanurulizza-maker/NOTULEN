@@ -183,17 +183,22 @@ include 'koneksi.php';
 
       <!-- Lampiran -->
       <div class="mb-4">
-        <label class="form-label fw-semibold">Lampiran</label>
-        <input type="file" name="lampiran" class="form-control">
-      </div>
+  <label class="form-label fw-semibold">Lampiran</label>
+  <input
+    type="file"
+    name="lampiran"
+    class="form-control"
+    accept=".pdf,.doc,.docx"
+  >
+  <small class="text-muted">
+    Format yang diperbolehkan: PDF, DOC, DOCX. Ukuran maksimal 2 MB.
+  </small>
+</div>
 
       <!-- Tombol -->
       <div class="d-flex gap-2">
         <button type="submit" name="aksi" value="simpan" class="btn btn-primary">
           💾 Simpan
-        </button>
-        <button type="submit" name="aksi" value="terbit" class="btn btn-success">
-          📤 Terbitkan
         </button>
         <button type="submit" name="aksi" value="arsip" class="btn btn-warning">
           🗂 Arsipkan
