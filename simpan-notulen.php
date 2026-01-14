@@ -87,5 +87,10 @@ mysqli_query($koneksi, "
     VALUES ('$user_id', 'Menambahkan notulen', NOW())
 ");
 
-header("Location: daftar-notulen.php");
-exit();
+if ($aksi === 'arsip') {
+    header("Location: arsip.php");
+} else {
+    header("Location: daftar-notulen.php");
+}
+exit;
+
